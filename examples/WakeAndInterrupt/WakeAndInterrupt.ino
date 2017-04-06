@@ -31,13 +31,18 @@ void setup()
 	printDriverError( returnCode );
 	Serial.println();
 
+	returnCode = mySensor.setDriveMode(2);
+	Serial.print("Mode request exited with: ");
+	printDriverError( returnCode );
+	Serial.println();
+	
 	//Configure and enable the interrupt link
 	pinMode(PIN_NOT_INT, INPUT_PULLUP);
 	returnCode = mySensor.enableInterrupts();
 	Serial.print("Interrupt configuation exited with: ");
 	printDriverError( returnCode );
 	Serial.println();
-
+	
 	//Configure the wake link
 	pinMode(PIN_NOT_WAKE, OUTPUT);
 	digitalWrite(PIN_NOT_WAKE, 1); //Start asleep

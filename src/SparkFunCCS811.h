@@ -112,13 +112,21 @@ public:
 	status_t disableInterrupts( void );
 	status_t setDriveMode( uint8_t mode );
 	status_t setEnvironmentalData( float relativeHumidity, float temperature );
+	void setRefResistance( uint16_t );
+	status_t readNTC( void );
 	uint16_t getTVOC( void );
-	uint16_t getCO2( void );	
-
+	uint16_t getCO2( void );
+	uint16_t getResistance( void );
+	
 private:
 	//These are the air quality values obtained from the sensor
+	uint16_t refResistance;
+	uint16_t resistance;
 	uint16_t tVOC;
 	uint16_t CO2;
+	uint16_t vrefCounts = 0;
+	uint16_t ntcCounts = 0;
+	
 };
 
 #endif  // End of __LIS3DH_IMU_H__ definition check

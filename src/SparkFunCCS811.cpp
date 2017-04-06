@@ -246,6 +246,8 @@ status_t CCS811Core::multiWriteRegister(uint8_t offset, uint8_t *inputPointer, u
 //****************************************************************************//
 CCS811::CCS811( uint8_t inputArg ) : CCS811Core( inputArg )
 {
+	refResistance = 10000;
+	resistance = 0;
 	tVOC = 0;
 	CO2 = 0;
 }
@@ -457,6 +459,24 @@ status_t CCS811::setEnvironmentalData( float relativeHumidity, float temperature
   return returnError;
 }
 
+void CCS811::setRefResistance( uint16_t input )
+{
+	refResistance = input;
+}
+
+status_t CCS811::readNTC( void )
+{
+	uint8_t data[4];
+	status_t returnError = multiReadRegister(CSS811_NTC, data, 4);
+
+	vrefCounts = ((uint16_t)data[0] << 8) | data[1];
+	ntcCounts = ((uint16_t)data[2] << 8) | data[3];
+	resistance = (float)ntcCounts * refResistance / (float)vrefCounts;
+	
+	
+	return returnError;
+}
+
 uint16_t CCS811::getTVOC( void )
 {
 	return tVOC;
@@ -465,4 +485,9 @@ uint16_t CCS811::getTVOC( void )
 uint16_t CCS811::getCO2( void )
 {
 	return CO2;
+}
+
+uint16_t CCS811::getResistance( void )
+{
+	return resistance;
 }
