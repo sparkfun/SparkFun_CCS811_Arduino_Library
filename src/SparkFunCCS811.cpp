@@ -259,11 +259,21 @@ CCS811::CCS811( uint8_t inputArg ) : CCS811Core( inputArg )
 //****************************************************************************//
 status_t CCS811::begin( void )
 {
-	status_t returnError = SENSOR_SUCCESS;
-	//Begin the inherited core.  This gets the physical wires connected
-	returnError = beginCore();
-	if( returnError != SENSOR_SUCCESS ) return returnError;
+	uint8_t data[4] = {0x11,0xE5,0x72,0x8A}; //Reset key
+	status_t returnError = SENSOR_SUCCESS; //Default error state
 
+	//restart the core
+	returnError = beginCore();
+	//Reset the device
+	multiWriteRegister(CSS811_SW_RESET, data, 4);
+	//Tclk = 1/16MHz = 0x0000000625
+	//0.001 s / tclk = 16000 counts
+	volatile uint8_t temp = 0;
+	for( uint16_t i = 0; i < 16000; i++ ) //This waits > 1ms @ 16MHz clock
+	{
+		temp++;
+	}
+	
 	if( checkForStatusError() == true ) return SENSOR_INTERNAL_ERROR;
 	
 	if( appValid() == false ) return SENSOR_INTERNAL_ERROR;
@@ -307,6 +317,7 @@ status_t CCS811::readAlgorithmResults( void )
 bool CCS811::checkForStatusError( void )
 {
   uint8_t value;
+  //return the status bit
   readRegister( CSS811_STATUS, &value );
   return (value & 1 << 0);
 }
@@ -380,8 +391,12 @@ status_t CCS811::enableInterrupts( void )
 {
   uint8_t value;
   status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
+  if(returnError != SENSOR_SUCCESS) return returnError;
+  Serial.println(value, HEX);
   value |= (1 << 3); //Set INTERRUPT bit
   writeRegister(CSS811_MEAS_MODE, value);
+  Serial.println(value, HEX);
+  return returnError;
 }
 
 //Disable the nINT signal
@@ -440,4 +455,14 @@ status_t CCS811::setEnvironmentalData( float relativeHumidity, float temperature
   }
   status_t returnError = multiWriteRegister(CSS811_ENV_DATA, envData, 4);
   return returnError;
+}
+
+uint16_t CCS811::getTVOC( void )
+{
+	return tVOC;
+}
+
+uint16_t CCS811::getCO2( void )
+{
+	return CO2;
 }

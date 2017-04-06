@@ -57,43 +57,42 @@ typedef enum
 } status_t;
 
 //This is the core operational class of the driver.
-//  LIS3DHCore contains only read and write operations towards the IMU.
-//  To use the higher level functions, use the class LIS3DH which inherits
+//  CCS811Core contains only read and write operations towards the sensor.
+//  To use the higher level functions, use the class CCS811 which inherits
 //  this class.
 
 class CCS811Core
 {
 public:
 	CCS811Core( uint8_t );
-//	LIS3DHCore( uint8_t, uint8_t );
-//	~LIS3DHCore() = default;
-//	
+	~CCS811Core() = default;
+
 	status_t beginCore( void );
-//	
-//	//The following utilities read and write to the IMU
-//
+
+	//***Reading functions***//
+	
 	//readRegister reads one 8-bit register
 	status_t readRegister( uint8_t offset, uint8_t* outputPointer);
 	//multiReadRegister takes a uint8 array address as input and performs
 	//  a number of consecutive reads
 	status_t multiReadRegister(uint8_t offset, uint8_t *outputPointer, uint8_t length);
 
+	//***Writing functions***//
+	
 	//Writes an 8-bit byte;
 	status_t writeRegister(uint8_t offset, uint8_t dataToWrite);
 	//multiWriteRegister takes a uint8 array address as input and performs
 	//  a number of consecutive writes
 	status_t multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length);
 
-	protected:
-//	//Communication stuff
+protected:
 	uint8_t I2CAddress;
 };
 
 //This is the highest level class of the driver.
 //
-//  class CCS811 inherits the core and makes use of the beginCore()
-//method through it's own begin() method.  It also contains the
-//settings struct to hold user settings.
+//  class CCS811 inherits the CCS811Core and makes use of the beginCore()
+//method through its own begin() method.  It also contains user settings/values.
 
 class CCS811 : public CCS811Core
 {
@@ -104,7 +103,6 @@ public:
 	status_t begin( void );
 
 	status_t readAlgorithmResults( void );
-	void configureCCS811( void );
 	bool checkForStatusError( void );
 	bool dataAvailable( void );
 	bool appValid( void );
@@ -114,8 +112,10 @@ public:
 	status_t disableInterrupts( void );
 	status_t setDriveMode( uint8_t mode );
 	status_t setEnvironmentalData( float relativeHumidity, float temperature );
+	uint16_t getTVOC( void );
+	uint16_t getCO2( void );	
 
-//private:
+private:
 	//These are the air quality values obtained from the sensor
 	uint16_t tVOC;
 	uint16_t CO2;

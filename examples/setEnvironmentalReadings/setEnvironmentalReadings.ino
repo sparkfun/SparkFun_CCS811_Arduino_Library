@@ -78,9 +78,9 @@ void loop()
 			mySensor.readAlgorithmResults(); //Calling this function updates the global tVOC and CO2 variables
 
 			Serial.print("CO2[");
-			Serial.print(mySensor.CO2);
+			Serial.print(mySensor.getCO2());
 			Serial.print("] tVOC[");
-			Serial.print(mySensor.tVOC);
+			Serial.print(mySensor.getTVOC());
 			Serial.print("] millis[");
 			Serial.print(millis());
 			Serial.print("]");
