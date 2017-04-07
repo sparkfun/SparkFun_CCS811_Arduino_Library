@@ -23,12 +23,14 @@ Serial.print it out at 9600 baud to serial monitor.
 #include <SparkFunCCS811.h>
 
 #define CCS811_ADDR 0x5B //7-bit unshifted default I2C Address
+#define PIN_TRIG 8
 
 CCS811 myCCS811(CCS811_ADDR);
 
 //---------------------------------------------------------------
 void setup()
 {
+	pinMode(PIN_TRIG, OUTPUT);
 	Serial.begin(9600);
 	Serial.println();
 	Serial.println("Apply NTC data to CCS811 for compensation.");
@@ -38,7 +40,7 @@ void setup()
 	printDriverError( returnCode );
 	Serial.println();
 	
-	myCCS811.setRefResistance( 11000 );
+	myCCS811.setRefResistance( 9950 );
 
 }
 //---------------------------------------------------------------
@@ -80,9 +82,12 @@ void printInfoSerial()
 	Serial.print(myCCS811.getTVOC());
 	Serial.println(" ppb");
 
+	digitalWrite(PIN_TRIG, 0);
 	myCCS811.readNTC();
-	Serial.println( myCCS811.getResistance() - 4620 );
-
+	digitalWrite(PIN_TRIG, 1);
+	Serial.println( myCCS811.getResistance() );
+	Serial.println( myCCS811.getTemp(), 2);
+	myCCS811.setEnvironmentalData( 50, myCCS811.getTemp());
 	//Serial.println("BME280 data:");
 	//Serial.print(" Temperature: ");
 	//Serial.print(myBME280.readTempC(), 2);

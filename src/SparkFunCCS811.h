@@ -117,6 +117,7 @@ public:
 	uint16_t getTVOC( void );
 	uint16_t getCO2( void );
 	uint16_t getResistance( void );
+	double getTemp( void );
 	
 private:
 	//These are the air quality values obtained from the sensor
@@ -126,7 +127,7 @@ private:
 	uint16_t CO2;
 	uint16_t vrefCounts = 0;
 	uint16_t ntcCounts = 0;
-	
+	double Temp;	
 };
 
 #endif  // End of __LIS3DH_IMU_H__ definition check

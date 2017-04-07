@@ -35,6 +35,7 @@ Distributed as-is; no warranty is given.
 
 #include <Arduino.h>
 #include "Wire.h"
+#include <math.h>
 
 //****************************************************************************//
 //
@@ -434,8 +435,8 @@ status_t CCS811::setDriveMode( uint8_t mode )
 //This function expects the humidity and temp to come in as floats
 status_t CCS811::setEnvironmentalData( float relativeHumidity, float temperature )
 {
-  int rH = relativeHumidity * 1000; //42.348 becomes 42348
-  int temp = temperature * 1000; //23.2 becomes 23200
+  uint32_t rH = relativeHumidity * 1000; //42.348 becomes 42348
+  uint32_t temp = temperature * 1000; //23.2 becomes 23200
 
   byte envData[4];
 
@@ -470,10 +471,22 @@ status_t CCS811::readNTC( void )
 	status_t returnError = multiReadRegister(CSS811_NTC, data, 4);
 
 	vrefCounts = ((uint16_t)data[0] << 8) | data[1];
+	Serial.print("vrefCounts: ");
+	Serial.println(vrefCounts);
 	ntcCounts = ((uint16_t)data[2] << 8) | data[3];
-	resistance = (float)ntcCounts * refResistance / (float)vrefCounts;
+	Serial.print("ntcCounts: ");
+	Serial.println(ntcCounts);
+	Serial.print("sum: ");
+	Serial.println(ntcCounts + vrefCounts);
+	resistance = ((float)ntcCounts * refResistance / (float)vrefCounts);
+
 	
-	
+	//Code from Milan Malesevic and Zoran Stupic, 2011,
+	//Modified by max mayfield,
+	Temp = log((long)resistance);
+	Temp = 1 / (0.001129148 + (0.000234125 * Temp) + (0.0000000876741 * Temp * Temp * Temp));
+	Temp = Temp - 273.15;  // Convert Kelvin to Celsius
+
 	return returnError;
 }
 
@@ -490,4 +503,9 @@ uint16_t CCS811::getCO2( void )
 uint16_t CCS811::getResistance( void )
 {
 	return resistance;
+}
+
+double CCS811::getTemp( void )
+{
+	return Temp;
 }
