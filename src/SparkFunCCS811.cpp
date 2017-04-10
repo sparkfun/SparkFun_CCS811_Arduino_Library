@@ -249,6 +249,7 @@ CCS811::CCS811( uint8_t inputArg ) : CCS811Core( inputArg )
 {
 	refResistance = 10000;
 	resistance = 0;
+	temperature = 0;
 	tVOC = 0;
 	CO2 = 0;
 }
@@ -305,69 +306,69 @@ status_t CCS811::begin( void )
 //Returns nothing
 status_t CCS811::readAlgorithmResults( void )
 {
-  uint8_t data[4];
-  status_t returnError = multiReadRegister(CSS811_ALG_RESULT_DATA, data, 4);
-  if( returnError != SENSOR_SUCCESS ) return 0;
-  // Data ordered:
-  // co2MSB, co2LSB, tvocMSB, tvocLSB
+	uint8_t data[4];
+	status_t returnError = multiReadRegister(CSS811_ALG_RESULT_DATA, data, 4);
+	if( returnError != SENSOR_SUCCESS ) return returnError;
+	// Data ordered:
+	// co2MSB, co2LSB, tvocMSB, tvocLSB
 
-  CO2 = ((uint16_t)data[0] << 8) | data[1];
-  tVOC = ((uint16_t)data[2] << 8) | data[3];
-  return SENSOR_SUCCESS;
+	CO2 = ((uint16_t)data[0] << 8) | data[1];
+	tVOC = ((uint16_t)data[2] << 8) | data[3];
+	return SENSOR_SUCCESS;
 }
 
 //Checks to see if error bit is set
 bool CCS811::checkForStatusError( void )
 {
-  uint8_t value;
-  //return the status bit
-  readRegister( CSS811_STATUS, &value );
-  return (value & 1 << 0);
+	uint8_t value;
+	//return the status bit
+	readRegister( CSS811_STATUS, &value );
+	return (value & 1 << 0);
 }
 
 //Checks to see if DATA_READ flag is set in the status register
 bool CCS811::dataAvailable( void )
 {
-  uint8_t value;
-  status_t returnError = readRegister( CSS811_STATUS, &value );
-  if( returnError != SENSOR_SUCCESS )
-  {
-	  return 0;
-  }
-  else
-  {
-	  return (value & 1 << 3);
-  }
+	uint8_t value;
+	status_t returnError = readRegister( CSS811_STATUS, &value );
+	if( returnError != SENSOR_SUCCESS )
+	{
+		return 0;
+	}
+	else
+	{
+		return (value & 1 << 3);
+	}
 }
 
 //Checks to see if APP_VALID flag is set in the status register
 bool CCS811::appValid( void )
 {
-  uint8_t value;
-  status_t returnError = readRegister( CSS811_STATUS, &value );
-  if( returnError != SENSOR_SUCCESS )
-  {
-	  return 0;
-  }
-  else
-  {
-	  return (value & 1 << 4);
-  }
+	uint8_t value;
+	status_t returnError = readRegister( CSS811_STATUS, &value );
+	if( returnError != SENSOR_SUCCESS )
+	{
+		return 0;
+	}
+	else
+	{
+		return (value & 1 << 4);
+	}
 }
 
 uint8_t CCS811::getErrorRegister( void )
 {
 	uint8_t value;
 	
-  status_t returnError = readRegister( CSS811_ERROR_ID, &value );
-  if( returnError != SENSOR_SUCCESS )
-  {
-	  return 0xFF;
-  }
-  else
-  {
-	  return value;  //Send all errors in the event of communication error
-  }
+	status_t returnError = readRegister( CSS811_ERROR_ID, &value );
+	if( returnError != SENSOR_SUCCESS )
+	{
+		return 0xFF;
+	}
+	else
+	{
+		return value;  //Send all errors in the event of communication error
+	}
 }
 
 //Returns the baseline value
@@ -375,42 +376,53 @@ uint8_t CCS811::getErrorRegister( void )
 //You must put the sensor in clean air and record this value
 uint16_t CCS811::getBaseline( void )
 {
-  uint8_t data[2];
-  status_t returnError = multiReadRegister(CSS811_BASELINE, data, 2);
+	uint8_t data[2];
+	status_t returnError = multiReadRegister(CSS811_BASELINE, data, 2);
 
-  unsigned int baseline = ((uint16_t)data[0] << 8) | data[1];
-  if( returnError != SENSOR_SUCCESS )
-  {
-	  return 0;
-  }
-  else
-  {
-	  return (baseline);
-  }
+	unsigned int baseline = ((uint16_t)data[0] << 8) | data[1];
+	if( returnError != SENSOR_SUCCESS )
+	{
+		return 0;
+	}
+	else
+	{
+		return (baseline);
+	}
+}
+
+status_t CCS811::setBaseline( uint16_t input )
+{
+	uint8_t data[2];
+	data[0] = (input >> 8) & 0x00FF;
+	data[1] = input & 0x00FF;
+	
+	status_t returnError = multiWriteRegister(CSS811_BASELINE, data, 2);
+	
+	return returnError;
 }
 
 //Enable the nINT signal
 status_t CCS811::enableInterrupts( void )
 {
-  uint8_t value;
-  status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
-  if(returnError != SENSOR_SUCCESS) return returnError;
-  Serial.println(value, HEX);
-  value |= (1 << 3); //Set INTERRUPT bit
-  writeRegister(CSS811_MEAS_MODE, value);
-  Serial.println(value, HEX);
-  return returnError;
+	uint8_t value;
+	status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
+	if(returnError != SENSOR_SUCCESS) return returnError;
+	Serial.println(value, HEX);
+	value |= (1 << 3); //Set INTERRUPT bit
+	writeRegister(CSS811_MEAS_MODE, value);
+	Serial.println(value, HEX);
+	return returnError;
 }
 
 //Disable the nINT signal
 status_t CCS811::disableInterrupts( void )
 {
-  uint8_t value;
-  status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
-  if( returnError != SENSOR_SUCCESS ) return returnError;
-  value &= ~(1 << 3); //Clear INTERRUPT bit
-  returnError = writeRegister(CSS811_MEAS_MODE, value);
-  return returnError;
+	uint8_t value;
+	status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
+	if( returnError != SENSOR_SUCCESS ) return returnError;
+	value &= ~(1 << 3); //Clear INTERRUPT bit
+	returnError = writeRegister(CSS811_MEAS_MODE, value);
+	return returnError;
 }
 
 //Mode 0 = Idle
@@ -420,47 +432,53 @@ status_t CCS811::disableInterrupts( void )
 //Mode 4 = RAW mode
 status_t CCS811::setDriveMode( uint8_t mode )
 {
-  if (mode > 4) mode = 4; //sanitize input
+	if (mode > 4) mode = 4; //sanitize input
 
-  uint8_t value;
-  status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
-  if( returnError != SENSOR_SUCCESS ) return returnError;
-  value &= ~(0b00000111 << 4); //Clear DRIVE_MODE bits
-  value |= (mode << 4); //Mask in mode
-  returnError = writeRegister(CSS811_MEAS_MODE, value);
-  return returnError;
+	uint8_t value;
+	status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
+	if( returnError != SENSOR_SUCCESS ) return returnError;
+	value &= ~(0b00000111 << 4); //Clear DRIVE_MODE bits
+	value |= (mode << 4); //Mask in mode
+	returnError = writeRegister(CSS811_MEAS_MODE, value);
+	return returnError;
 }
 
 //Given a temp and humidity, write this data to the CSS811 for better compensation
 //This function expects the humidity and temp to come in as floats
 status_t CCS811::setEnvironmentalData( float relativeHumidity, float temperature )
 {
-  uint32_t rH = relativeHumidity * 1000; //42.348 becomes 42348
-  uint32_t temp = temperature * 1000; //23.2 becomes 23200
+	//Check for invalid temperatures
+	if((temperature < -25)||(temperature > 50)) return SENSOR_GENERIC_ERROR;
+	
+	//Check for invalid humidity
+	if((relativeHumidity < 0)||(relativeHumidity > 100)) return SENSOR_GENERIC_ERROR;
+	
+	uint32_t rH = relativeHumidity * 1000; //42.348 becomes 42348
+	uint32_t temp = temperature * 1000; //23.2 becomes 23200
 
-  byte envData[4];
+	byte envData[4];
 
-  //Split value into 7-bit integer and 9-bit fractional
-  envData[0] = ((rH % 1000) / 100) > 7 ? (rH / 1000 + 1) << 1 : (rH / 1000) << 1;
-  envData[1] = 0; //CCS811 only supports increments of 0.5 so bits 7-0 will always be zero
-  if (((rH % 1000) / 100) > 2 && (((rH % 1000) / 100) < 8))
-  {
-    envData[0] |= 1; //Set 9th bit of fractional to indicate 0.5%
-  }
+	//Split value into 7-bit integer and 9-bit fractional
+	envData[0] = ((rH % 1000) / 100) > 7 ? (rH / 1000 + 1) << 1 : (rH / 1000) << 1;
+	envData[1] = 0; //CCS811 only supports increments of 0.5 so bits 7-0 will always be zero
+	if (((rH % 1000) / 100) > 2 && (((rH % 1000) / 100) < 8))
+	{
+		envData[0] |= 1; //Set 9th bit of fractional to indicate 0.5%
+	}
 
-  temp += 25000; //Add the 25C offset
-  //Split value into 7-bit integer and 9-bit fractional
-  envData[2] = ((temp % 1000) / 100) > 7 ? (temp / 1000 + 1) << 1 : (temp / 1000) << 1;
-  envData[3] = 0;
-  if (((temp % 1000) / 100) > 2 && (((temp % 1000) / 100) < 8))
-  {
-    envData[2] |= 1;  //Set 9th bit of fractional to indicate 0.5C
-  }
-  status_t returnError = multiWriteRegister(CSS811_ENV_DATA, envData, 4);
-  return returnError;
+	temp += 25000; //Add the 25C offset
+	//Split value into 7-bit integer and 9-bit fractional
+	envData[2] = ((temp % 1000) / 100) > 7 ? (temp / 1000 + 1) << 1 : (temp / 1000) << 1;
+	envData[3] = 0;
+	if (((temp % 1000) / 100) > 2 && (((temp % 1000) / 100) < 8))
+	{
+		envData[2] |= 1;  //Set 9th bit of fractional to indicate 0.5C
+	}
+	status_t returnError = multiWriteRegister(CSS811_ENV_DATA, envData, 4);
+	return returnError;
 }
 
-void CCS811::setRefResistance( uint16_t input )
+void CCS811::setRefResistance( float input )
 {
 	refResistance = input;
 }
@@ -471,21 +489,21 @@ status_t CCS811::readNTC( void )
 	status_t returnError = multiReadRegister(CSS811_NTC, data, 4);
 
 	vrefCounts = ((uint16_t)data[0] << 8) | data[1];
-	Serial.print("vrefCounts: ");
-	Serial.println(vrefCounts);
+	//Serial.print("vrefCounts: ");
+	//Serial.println(vrefCounts);
 	ntcCounts = ((uint16_t)data[2] << 8) | data[3];
-	Serial.print("ntcCounts: ");
-	Serial.println(ntcCounts);
-	Serial.print("sum: ");
-	Serial.println(ntcCounts + vrefCounts);
+	//Serial.print("ntcCounts: ");
+	//Serial.println(ntcCounts);
+	//Serial.print("sum: ");
+	//Serial.println(ntcCounts + vrefCounts);
 	resistance = ((float)ntcCounts * refResistance / (float)vrefCounts);
 
 	
 	//Code from Milan Malesevic and Zoran Stupic, 2011,
-	//Modified by max mayfield,
-	Temp = log((long)resistance);
-	Temp = 1 / (0.001129148 + (0.000234125 * Temp) + (0.0000000876741 * Temp * Temp * Temp));
-	Temp = Temp - 273.15;  // Convert Kelvin to Celsius
+	//Modified by Max Mayfield,
+	temperature = log((long)resistance);
+	temperature = 1 / (0.001129148 + (0.000234125 * temperature) + (0.0000000876741 * temperature * temperature * temperature));
+	temperature = temperature - 273.15;  // Convert Kelvin to Celsius
 
 	return returnError;
 }
@@ -500,12 +518,12 @@ uint16_t CCS811::getCO2( void )
 	return CO2;
 }
 
-uint16_t CCS811::getResistance( void )
+float CCS811::getResistance( void )
 {
 	return resistance;
 }
 
-double CCS811::getTemp( void )
+float CCS811::getTemperature( void )
 {
-	return Temp;
+	return temperature;
 }

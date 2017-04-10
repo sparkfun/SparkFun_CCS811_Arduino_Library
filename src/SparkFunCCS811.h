@@ -52,7 +52,8 @@ typedef enum
 	SENSOR_SUCCESS,
 	SENSOR_ID_ERROR,
 	SENSOR_I2C_ERROR,
-	SENSOR_INTERNAL_ERROR
+	SENSOR_INTERNAL_ERROR,
+	SENSOR_GENERIC_ERROR
 	//...
 } status_t;
 
@@ -108,26 +109,27 @@ public:
 	bool appValid( void );
 	uint8_t getErrorRegister( void );
 	uint16_t getBaseline( void );
+	status_t setBaseline( uint16_t );
 	status_t enableInterrupts( void );
 	status_t disableInterrupts( void );
 	status_t setDriveMode( uint8_t mode );
 	status_t setEnvironmentalData( float relativeHumidity, float temperature );
-	void setRefResistance( uint16_t );
+	void setRefResistance( float );
 	status_t readNTC( void );
 	uint16_t getTVOC( void );
 	uint16_t getCO2( void );
-	uint16_t getResistance( void );
-	double getTemp( void );
+	float getResistance( void );
+	float getTemperature( void );
 	
 private:
 	//These are the air quality values obtained from the sensor
-	uint16_t refResistance;
-	uint16_t resistance;
+	float refResistance;
+	float resistance;
 	uint16_t tVOC;
 	uint16_t CO2;
 	uint16_t vrefCounts = 0;
 	uint16_t ntcCounts = 0;
-	double Temp;	
+	float temperature;	
 };
 
 #endif  // End of __LIS3DH_IMU_H__ definition check

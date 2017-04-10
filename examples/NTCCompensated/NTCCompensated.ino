@@ -82,22 +82,20 @@ void printInfoSerial()
 	Serial.print(myCCS811.getTVOC());
 	Serial.println(" ppb");
 
-	digitalWrite(PIN_TRIG, 0);
 	myCCS811.readNTC();
-	digitalWrite(PIN_TRIG, 1);
-	Serial.println( myCCS811.getResistance() );
-	Serial.println( myCCS811.getTemp(), 2);
-	myCCS811.setEnvironmentalData( 50, myCCS811.getTemp());
-	//Serial.println("BME280 data:");
-	//Serial.print(" Temperature: ");
-	//Serial.print(myBME280.readTempC(), 2);
-	//Serial.println(" degrees C");
+	Serial.print(" Measured resistance : "); 
+	Serial.print( myCCS811.getResistance() );
+	Serial.println(" ohms");
 	
+	Serial.print(" Converted temperature : "); 
 
+	float readTemperature = myCCS811.getTemperature();
+	Serial.print( readTemperature, 2);
+	Serial.println(" deg C");
+
+	myCCS811.setEnvironmentalData( 50, readTemperature);
 
 	Serial.println();
-
-
 }
 
 void printDriverError( status_t errorCode )
@@ -115,6 +113,9 @@ void printDriverError( status_t errorCode )
 		break;
 	case SENSOR_INTERNAL_ERROR:
 		Serial.print("INTERNAL_ERROR");
+		break;
+	case SENSOR_GENERIC_ERROR:
+		Serial.print("GENERIC_ERROR");
 		break;
 	default:
 		Serial.print("Unspecified error.");
