@@ -1,45 +1,57 @@
+/******************************************************************************
+BME280Compensated.ino
 
-/*
-CCS811 Air Quality Sensor Example Code
-By: Nathan Seidle
-SparkFun Electronics
-Date: February 7th, 2017
-License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+Marshall Taylor @ SparkFun Electronics
 
-Sends the humidity and temperature from a separate sensor to the CCS811 so
-that the CCS811 can adjust its algorithm.
+April 4, 2017
+
+https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
+
+This example uses a BME280 to gather environmental data that is then used
+to compensate the CCS811.
 
 Hardware Connections (Breakoutboard to Arduino):
-3.3V = 3.3V
-GND = GND
-SDA = A4
-SCL = A5
-WAKE = D2
+  3.3V to 3.3V pin
+  GND to GND pin
+  SDA to A4
+  SCL to A5
 
-Serial.print it out at 9600 baud to serial monitor.
-*/
+Resources:
+Uses Wire.h for i2c operation
 
-#include <Wire.h>
-#include <SPI.h>
+Development environment specifics:
+Arduino IDE 1.8.1
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #include <SparkFunBME280.h>
 #include <SparkFunCCS811.h>
 
-#define CCS811_ADDR 0x5B //7-bit unshifted default I2C Address
+#define CCS811_ADDR 0x5B //Default I2C Address
+//#define CCS811_ADDR 0x5A //Alternate I2C Address
+
 #define PIN_NOT_WAKE 5
 
+//Global sensor objects
 CCS811 myCCS811(CCS811_ADDR);
-
-//Global sensor object
 BME280 myBME280;
-//---------------------------------------------------------------
+
 void setup()
 {
 	Serial.begin(9600);
 	Serial.println();
 	Serial.println("Apply BME280 data to CCS811 for compensation.");
 
+	//This begins the CCS811 sensor and prints error status of .begin()
 	status_t returnCode = myCCS811.begin();
 	Serial.print("CCS811 begin exited with: ");
+	//Pass the error code to a function to print the results
 	printDriverError( returnCode );
 	Serial.println();
 
@@ -67,9 +79,12 @@ void setup()
 //---------------------------------------------------------------
 void loop()
 {
+	//Check to see if data is available
 	if (myCCS811.dataAvailable())
 	{
-		myCCS811.readAlgorithmResults(); //Calling this function updates the global tVOC and CO2 variables
+		//Calling this function updates the global tVOC and eCO2 variables
+		myCCS811.readAlgorithmResults();
+		//printInfoSerial fetches the values of tVOC and eCO2
 		printInfoSerial();
 
 		float BMEtempC = myBME280.readTempC();
@@ -81,10 +96,12 @@ void loop()
 		Serial.println(BMEhumid);
 		Serial.println();
 		
+		//This sends the temperature data to the CCS811
 		myCCS811.setEnvironmentalData(BMEhumid, BMEtempC);
 	}
 	else if (myCCS811.checkForStatusError())
 	{
+		//If the CCS811 found an internal error, print it.
 		printSensorError();
 	}
 
@@ -94,11 +111,13 @@ void loop()
 //---------------------------------------------------------------
 void printInfoSerial()
 {
+	//getCO2() gets the previously read data from the library
 	Serial.println("CCS811 data:");
 	Serial.print(" CO2 concentration : "); 
 	Serial.print(myCCS811.getCO2());
 	Serial.println(" ppm");
 
+	//getTVOC() gets the previously read data from the library
 	Serial.print(" TVOC concentration : "); 
 	Serial.print(myCCS811.getTVOC());
 	Serial.println(" ppb");
@@ -137,6 +156,11 @@ void printInfoSerial()
 
 }
 
+//printDriverError decodes the status_t type and prints the
+//type of error to the serial terminal.
+//
+//Save the return value of any function of type status_t, then pass
+//to this function to see what the output was.
 void printDriverError( status_t errorCode )
 {
 	switch( errorCode )
@@ -153,14 +177,16 @@ void printDriverError( status_t errorCode )
 	case SENSOR_INTERNAL_ERROR:
 		Serial.print("INTERNAL_ERROR");
 		break;
+	case SENSOR_GENERIC_ERROR:
+		Serial.print("GENERIC_ERROR");
+		break;
 	default:
 		Serial.print("Unspecified error.");
 	}
 }
 
-//Displays the type of error
-//Calling this causes reading the contents of the ERROR register
-//This should clear the ERROR_ID register
+//printSensorError gets, clears, then prints the errors
+//saved within the error register.
 void printSensorError()
 {
 	uint8_t error = myCCS811.getErrorRegister();

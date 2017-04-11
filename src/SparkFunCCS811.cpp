@@ -1,20 +1,20 @@
 /******************************************************************************
 SparkFunCCS811.cpp
-LIS3DH Arduino and Teensy Driver
+CCS811 Arduino library
 
 Marshall Taylor @ SparkFun Electronics
-Nov 16, 2016
-https://github.com/sparkfun/LIS3DH_Breakout
-https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
+Nathan Seidle @ SparkFun Electronics
+
+April 4, 2017
+
+https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
 Resources:
 Uses Wire.h for i2c operation
-Uses SPI.h for SPI operation
-Either can be omitted if not used
 
 Development environment specifics:
-Arduino IDE 1.6.4
-Teensy loader 1.23
+Arduino IDE 1.8.1
 
 This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 
@@ -23,10 +23,6 @@ or concerns with licensing, please contact techsupport@sparkfun.com.
 
 Distributed as-is; no warranty is given.
 ******************************************************************************/
-//Use VERBOSE_SERIAL to add debug serial to an existing Serial object.
-//Note:  Use of VERBOSE_SERIAL adds delays surround RW ops, and should not be used
-//for functional testing.
-//#define VERBOSE_SERIAL
 
 //See SparkFunCCS811.h for additional topology notes.
 
@@ -63,6 +59,10 @@ status_t CCS811Core::beginCore(void)
 #endif
 
 #ifdef __MK20DX256__
+#else
+#endif
+
+#ifdef ARDUINO_ARCH_ESP32
 #else
 #endif
 
@@ -109,7 +109,6 @@ status_t CCS811Core::readRegister(uint8_t offset, uint8_t* outputPointer)
 	uint8_t result;
 	uint8_t numBytes = 1;
 	status_t returnError = SENSOR_SUCCESS;
-
 	Wire.beginTransmission(I2CAddress);
 	Wire.write(offset);
 	if( Wire.endTransmission() != 0 )
@@ -150,8 +149,6 @@ status_t CCS811Core::multiReadRegister(uint8_t offset, uint8_t *outputPointer, u
 	uint8_t c = 0;
 	//Set the address
 	Wire.beginTransmission(I2CAddress);
-	//NOT SURE IF AUTOINC REQUIRED!!!
-	//offset |= 0x80; //turn auto-increment bit on, bit 7 for I2C
 	Wire.write(offset);
 	if( Wire.endTransmission() != 0 )
 	{
@@ -268,16 +265,28 @@ status_t CCS811::begin( void )
 
 	//restart the core
 	returnError = beginCore();
+	if( returnError != SENSOR_SUCCESS ) return returnError;
 	//Reset the device
 	multiWriteRegister(CSS811_SW_RESET, data, 4);
 	//Tclk = 1/16MHz = 0x0000000625
 	//0.001 s / tclk = 16000 counts
 	volatile uint8_t temp = 0;
+#ifdef ARDUINO_ARCH_ESP32
+	for( uint32_t i = 0; i < 80000; i++ ) //This waits > 1ms @ 80MHz clock
+	{
+		temp++;
+	}
+#elsif __AVR__
 	for( uint16_t i = 0; i < 16000; i++ ) //This waits > 1ms @ 16MHz clock
 	{
 		temp++;
 	}
-	
+#else
+	for( uint32_t i = 0; i < 200000; i++ ) //Spin for a good while
+	{
+		temp++;
+	}	
+#endif
 	if( checkForStatusError() == true ) return SENSOR_INTERNAL_ERROR;
 	
 	if( appValid() == false ) return SENSOR_INTERNAL_ERROR;

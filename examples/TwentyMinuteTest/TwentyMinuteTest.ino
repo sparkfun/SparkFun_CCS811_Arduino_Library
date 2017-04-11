@@ -1,39 +1,54 @@
-/*
-  CCS811 Air Quality Sensor Example Code
-  By: Nathan Seidle
-  SparkFun Electronics
-  Date: February 7th, 2017
-  License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+/******************************************************************************
+TwentyMinuteTest.ino
 
-  Calculates the current run time and indicates when 20 minutes has passed
+Marshall Taylor @ SparkFun Electronics
+Nathan Seidle @ SparkFun Electronics
+
+April 4, 2017
+
+https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
+
+Hardware Connections (Breakoutboard to Arduino):
+  3.3V to 3.3V pin
+  GND to GND pin
+  SDA to A4
+  SCL to A5
+
+Calculates the current run time and indicates when 20 minutes has passed
 
   Read the TVOC and CO2 values from the SparkFun CSS811 breakout board
 
   A new sensor requires at 48-burn in. Once burned in a sensor requires
   20 minutes of run in before readings are considered good.
 
-  Hardware Connections (Breakoutboard to Arduino):
-  3.3V = 3.3V
-  GND = GND
-  SDA = A4
-  SCL = A5
+Resources:
+Uses Wire.h for i2c operation
 
-  Serial.print it out at 9600 baud to serial monitor.
-*/
+Development environment specifics:
+Arduino IDE 1.8.1
 
-#include <Wire.h>
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #include "SparkFunCCS811.h"
 
-#define CCS811_ADDR 0x5B //7-bit unshifted default I2C Address
+#define CCS811_ADDR 0x5B //Default I2C Address
+//#define CCS811_ADDR 0x5A //Alternate I2C Address
 
-CCS811 mySensor(CCS811_ADDR);
+CCS811 myCCS811(CCS811_ADDR);
 
 void setup()
 {
   Serial.begin(9600);
   Serial.println("20 minute test");
 
-	status_t returnCode = mySensor.begin();
+  //This begins the CCS811 sensor and prints error status of .begin()
+	status_t returnCode = myCCS811.begin();
 	Serial.print("begin exited with: ");
 	printDriverError( returnCode );
 	Serial.println();
@@ -41,21 +56,21 @@ void setup()
 
 void loop()
 {
-  if (mySensor.dataAvailable())
+  if (myCCS811.dataAvailable())
   {
-    mySensor.readAlgorithmResults();
+    myCCS811.readAlgorithmResults();
 
-    Serial.print("CO2[");
-    Serial.print(mySensor.CO2);
-    Serial.print("] tVOC[");
-    Serial.print(mySensor.tVOC);
+	Serial.print("CO2[");
+	Serial.print(myCCS811.getCO2());	
+	Serial.print("] tVOC[");	
+	Serial.print(myCCS811.getTVOC());	
     Serial.print("] millis[");
     Serial.print(millis());
     Serial.print("] ");
 	printRunTime();
     Serial.println();
   }
-  else if (mySensor.checkForStatusError())
+  else if (myCCS811.checkForStatusError())
   {
     printSensorError();
   }
@@ -83,48 +98,54 @@ void printRunTime()
   if(hours == 0 && minutes < 20) Serial.print(" Not yet valid");
 }
 
-//Displays the type of error
-//Calling this causes reading the contents of the ERROR register
-//This should clear the ERROR_ID register
-void printSensorError()
-{
-  uint8_t error = mySensor.getErrorRegister();
-
-  if( error == 0xFF )//comm error
-  {
-	  Serial.println("Failed to get ERROR_ID register.");
-  }
-  else
-  {
-	Serial.print("Error: ");
-	if (error & 1 << 5) Serial.print("HeaterSupply");
-	if (error & 1 << 4) Serial.print("HeaterFault");
-	if (error & 1 << 3) Serial.print("MaxResistance");
-	if (error & 1 << 2) Serial.print("MeasModeInvalid");
-	if (error & 1 << 1) Serial.print("ReadRegInvalid");
-	if (error & 1 << 0) Serial.print("MsgInvalid");
-	Serial.println();
-  }
-}
-
+//printDriverError decodes the status_t type and prints the
+//type of error to the serial terminal.
+//
+//Save the return value of any function of type status_t, then pass
+//to this function to see what the output was.
 void printDriverError( status_t errorCode )
 {
-  switch( errorCode )
-  {
-	  case SENSOR_SUCCESS:
-	  Serial.print("SUCCESS");
-	  break;
-	  case SENSOR_ID_ERROR:
-	  Serial.print("ID_ERROR");
-	  break;
-	  case SENSOR_I2C_ERROR:
-	  Serial.print("I2C_ERROR");
-	  break;
-	  case SENSOR_INTERNAL_ERROR:
-	  Serial.print("INTERNAL_ERROR");
-	  break;
-	  default:
-	  Serial.print("Unspecified error.");
-  }
+	switch( errorCode )
+	{
+	case SENSOR_SUCCESS:
+		Serial.print("SUCCESS");
+		break;
+	case SENSOR_ID_ERROR:
+		Serial.print("ID_ERROR");
+		break;
+	case SENSOR_I2C_ERROR:
+		Serial.print("I2C_ERROR");
+		break;
+	case SENSOR_INTERNAL_ERROR:
+		Serial.print("INTERNAL_ERROR");
+		break;
+	case SENSOR_GENERIC_ERROR:
+		Serial.print("GENERIC_ERROR");
+		break;
+	default:
+		Serial.print("Unspecified error.");
+	}
 }
 
+//printSensorError gets, clears, then prints the errors
+//saved within the error register.
+void printSensorError()
+{
+	uint8_t error = myCCS811.getErrorRegister();
+
+	if( error == 0xFF )//comm error
+	{
+		Serial.println("Failed to get ERROR_ID register.");
+	}
+	else
+	{
+		Serial.print("Error: ");
+		if (error & 1 << 5) Serial.print("HeaterSupply");
+		if (error & 1 << 4) Serial.print("HeaterFault");
+		if (error & 1 << 3) Serial.print("MaxResistance");
+		if (error & 1 << 2) Serial.print("MeasModeInvalid");
+		if (error & 1 << 1) Serial.print("ReadRegInvalid");
+		if (error & 1 << 0) Serial.print("MsgInvalid");
+		Serial.println();
+	}
+}

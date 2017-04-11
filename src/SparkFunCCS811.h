@@ -1,20 +1,20 @@
 /******************************************************************************
 SparkFunCCS811.h
-LIS3DH Arduino and Teensy Driver
+CCS811 Arduino library
 
 Marshall Taylor @ SparkFun Electronics
-Nov 16, 2016
-https://github.com/sparkfun/LIS3DH_Breakout
-https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
+Nathan Seidle @ SparkFun Electronics
+
+April 4, 2017
+
+https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
 Resources:
 Uses Wire.h for i2c operation
-Uses SPI.h for SPI operation
-Either can be omitted if not used
 
 Development environment specifics:
-Arduino IDE 1.6.4
-Teensy loader 1.23
+Arduino IDE 1.8.1
 
 This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 

@@ -1,9 +1,12 @@
-/*
-CCS811 Air Quality Sensor Example Code
-By: Nathan Seidle
-SparkFun Electronics
-Date: February 7th, 2017
-License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+/******************************************************************************
+BaselineOperator.ino
+
+Marshall Taylor @ SparkFun Electronics
+
+April 4, 2017
+
+https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
 This example demonstrates usage of the baseline register.
 
@@ -32,13 +35,25 @@ Hardware Connections (Breakoutboard to Arduino):
   SDA to A4
   SCL to A5
 
-*/
+Resources:
+Uses Wire.h for i2c operation
+Uses EEPROM.h for internal EEPROM driving
 
-#include <Wire.h>
+Development environment specifics:
+Arduino IDE 1.8.1
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #include <SparkFunCCS811.h>
 #include <EEPROM.h>
 
-#define CCS811_ADDR 0x5B //7-bit unshifted default I2C Address
+#define CCS811_ADDR 0x5B //Default I2C Address
+//#define CCS811_ADDR 0x5A //Alternate I2C Address
 
 CCS811 mySensor(CCS811_ADDR);
 
@@ -53,7 +68,7 @@ void setup()
 	printDriverError( returnCode );
 	Serial.println();
 	
-	//Check for valid data already saved
+	//This looks for previously saved data in the eeprom at program start
 	if((EEPROM.read(0) == 0xA5)&&(EEPROM.read(1) == 0xB2))
 	{
 		Serial.println("EEPROM contains saved data.");
@@ -84,11 +99,13 @@ void loop()
 		switch(c)
 		{
 			case 's':
+				//This gets the latest baseline from the sensor
 				result = mySensor.getBaseline();
 				Serial.print("baseline for this sensor: 0x");
 				if(result < 0x100) Serial.print("0");
 				if(result < 0x10) Serial.print("0");
 				Serial.println(result, HEX);
+				//The baseline is saved (with valid data indicator bytes)
 				EEPROM.write(0, 0xA5);
 				EEPROM.write(1, 0xB2);
 				EEPROM.write(2, (result >> 8) & 0x00FF);
@@ -98,11 +115,13 @@ void loop()
 				if((EEPROM.read(0) == 0xA5)&&(EEPROM.read(1) == 0xB2))
 				{
 					Serial.println("EEPROM contains saved data.");
+					//The recovered baseline is packed into a 16 bit word
 					baselineToApply = ((unsigned int)EEPROM.read(2) << 8) | EEPROM.read(3);
 					Serial.print("Saved baseline: 0x");
 					if(baselineToApply < 0x100) Serial.print("0");
 					if(baselineToApply < 0x10) Serial.print("0");
 					Serial.println(baselineToApply, HEX);
+					//This programs the baseline into the sensor and monitors error states
 					errorStatus = mySensor.setBaseline( baselineToApply );
 					if( errorStatus == SENSOR_SUCCESS )
 					{
@@ -119,6 +138,7 @@ void loop()
 				}
 				break;
 			case 'c':
+				//Clear data indicator and data from the eeprom
 				Serial.println("Clearing EEPROM space.");
 				EEPROM.write(0, 0x00);
 				EEPROM.write(1, 0x00);
@@ -128,6 +148,7 @@ void loop()
 			case 'r':
 				if (mySensor.dataAvailable())
 				{
+					//Simply print the last sensor data
 					mySensor.readAlgorithmResults();
 					
 					Serial.print("CO2[");
@@ -149,6 +170,11 @@ void loop()
 	delay(10);
 }
 
+//printDriverError decodes the status_t type and prints the
+//type of error to the serial terminal.
+//
+//Save the return value of any function of type status_t, then pass
+//to this function to see what the output was.
 void printDriverError( status_t errorCode )
 {
 	switch( errorCode )
@@ -164,6 +190,9 @@ void printDriverError( status_t errorCode )
 		break;
 	case SENSOR_INTERNAL_ERROR:
 		Serial.print("INTERNAL_ERROR");
+		break;
+	case SENSOR_GENERIC_ERROR:
+		Serial.print("GENERIC_ERROR");
 		break;
 	default:
 		Serial.print("Unspecified error.");

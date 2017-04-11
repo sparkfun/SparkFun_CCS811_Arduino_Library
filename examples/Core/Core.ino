@@ -1,33 +1,48 @@
-/*
-  CCS811 Air Quality Sensor Example Code
-  By: Nathan Seidle
-  SparkFun Electronics
-  Date: February 7th, 2017
-  License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+/******************************************************************************
+Core.ino
 
-  Read the TVOC and CO2 values from the SparkFun CSS811 breakout board
+Marshall Taylor @ SparkFun Electronics
 
-  A new sensor requires at 48-burn in. Once burned in a sensor requires 
-  20 minutes of run in before readings are considered good.
+April 4, 2017
 
-  Hardware Connections (Breakoutboard to Arduino):
-  3.3V = 3.3V
-  GND = GND
-  SDA = A4
-  SCL = A5
+https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
-  Serial.print it out at 9600 baud to serial monitor.
-*/
+This example shows how the normally hidden core class operates the wire interface.
+
+The class 'CCS811Core' abstracts the wire library and contains special hardware
+functions, and is normally not needed.
+
+Use this sketch to test the core of the library, or inherit it with your own
+functions for performing CCS811 operations.
+
+Hardware Connections (Breakoutboard to Arduino):
+  3.3V to 3.3V pin
+  GND to GND pin
+  SDA to A4
+  SCL to A5
+
+
+Resources:
+Uses Wire.h for i2c operation
+
+Development environment specifics:
+Arduino IDE 1.8.1
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #include <Wire.h>
 #include "SparkFunCCS811.h"
 
-#define CCS811_ADDR 0x5B //7-bit unshifted default I2C Address
+#define CCS811_ADDR 0x5B //Default I2C Address
+//#define CCS811_ADDR 0x5A //Alternate I2C Address
 
 CCS811Core mySensor(CCS811_ADDR);
-
-//These are the air quality values obtained from the sensor
-unsigned int tVOC = 0;
-unsigned int CO2 = 0;
 
 void setup()
 {
@@ -35,7 +50,7 @@ void setup()
   Serial.println();
   Serial.println("CCS811 Core Example");
 
-//  configureCCS811(); //Turn on sensor
+  //This setup routiene is similar to what is used in the subclass' .begin() function
 	status_t returnCode = mySensor.beginCore();
 	Serial.print("beginCore exited with: ");
   switch( returnCode )
@@ -55,6 +70,7 @@ void setup()
 	  default:
 	  Serial.println("Unspecified error.");
   }
+  
   //Write to this register to start app
   Wire.beginTransmission(CCS811_ADDR);
   Wire.write(CSS811_APP_START);
@@ -73,7 +89,6 @@ void loop()
 	tempData[3] = 0x45;
 
 	mySensor.multiWriteRegister(0x11, tempData, 2);
-	//mySensor.writeRegister(0x11, tempData[0]);
 	
 	tempData[0] = 0x00;
 	tempData[1] = 0x00;
@@ -81,7 +96,6 @@ void loop()
 	tempData[3] = 0x00;
 	
 	mySensor.multiReadRegister(0x11, tempData, 3);
-	//mySensor.readRegister(0x01, tempData);
 	
   for( int i = 0; i < arraySize; i++)
   {

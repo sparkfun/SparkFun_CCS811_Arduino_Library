@@ -1,18 +1,57 @@
-//This example configures the nWAKE and nINT pins.
-//The interrupt pin is configured to pull low when the data is
-//ready to be collected.
-//The wake pin is configured to enable the sensor during I2C communications
+/******************************************************************************
+WakeAndInterrupt.ino
 
-//It is still a mystery if the wake pin is soldered correctly.
+Marshall Taylor @ SparkFun Electronics
 
+April 4, 2017
+
+https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
+
+This example configures the nWAKE and nINT pins.
+The interrupt pin is configured to pull low when the data is
+ready to be collected.
+The wake pin is configured to enable the sensor during I2C communications
+
+Hardware Connections (Breakoutboard to Arduino):
+  3.3V to 3.3V pin
+  GND to GND pin
+  SDA to A4
+  SCL to A5
+  NOT_INT to D6
+  NOT_WAKE to D5 (For 5V arduinos, use resistor divider)
+    D5---
+         |
+         R1 = 4.7K
+         |
+         --------NOT_WAKE
+         |
+         R2 = r.7K
+         |
+        GND
+	
+Resources:
+Uses Wire.h for i2c operation
+
+Development environment specifics:
+Arduino IDE 1.8.1
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #include <SparkFunCCS811.h>
 
-#define CCS811_ADDR 0x5B //7-bit unshifted default I2C Address
+#define CCS811_ADDR 0x5B //Default I2C Address
+//#define CCS811_ADDR 0x5A //Alternate I2C Address
 
 #define PIN_NOT_WAKE 5
 #define PIN_NOT_INT 6
 
-CCS811 mySensor(CCS811_ADDR);
+CCS811 myCCS811(CCS811_ADDR);
 
 //Global sensor object
 //---------------------------------------------------------------
@@ -25,25 +64,27 @@ void setup()
 
 	status_t returnCode;
 	
-	//Start the sensor
-	returnCode = mySensor.begin();
+//This begins the CCS811 sensor and prints error status of .begin()
+	returnCode = myCCS811.begin();
 	Serial.print("CCS811 begin exited with: ");
 	printDriverError( returnCode );
 	Serial.println();
 
-	returnCode = mySensor.setDriveMode(2);
+	//This sets the mode to 60 second reads, and prints returned error status.
+	returnCode = myCCS811.setDriveMode(2);
 	Serial.print("Mode request exited with: ");
 	printDriverError( returnCode );
 	Serial.println();
 	
-	//Configure and enable the interrupt link
+	//Configure and enable the interrupt line,
+	//then print error status
 	pinMode(PIN_NOT_INT, INPUT_PULLUP);
-	returnCode = mySensor.enableInterrupts();
+	returnCode = myCCS811.enableInterrupts();
 	Serial.print("Interrupt configuation exited with: ");
 	printDriverError( returnCode );
 	Serial.println();
 	
-	//Configure the wake link
+	//Configure the wake line
 	pinMode(PIN_NOT_WAKE, OUTPUT);
 	digitalWrite(PIN_NOT_WAKE, 1); //Start asleep
 	
@@ -51,23 +92,26 @@ void setup()
 //---------------------------------------------------------------
 void loop()
 {
+	//Look for interrupt request from CCS811
 	if(digitalRead(PIN_NOT_INT) == 0)
 	{
+		//Wake up the CCS811 logic engine
 		digitalWrite(PIN_NOT_WAKE, 0);
 		//Need to wait at least 50 us
 		delay(1);
-		//Interrupt signal caught
-		mySensor.readAlgorithmResults(); //Calling this function updates the global tVOC and CO2 variables
+		//Interrupt signal caught, so cause the CCS811 to run its algorithm
+		myCCS811.readAlgorithmResults(); //Calling this function updates the global tVOC and CO2 variables
 
 		Serial.print("CO2[");
-		Serial.print(mySensor.getCO2());
+		Serial.print(myCCS811.getCO2());
 		Serial.print("] tVOC[");
-		Serial.print(mySensor.getTVOC());
+		Serial.print(myCCS811.getTVOC());
 		Serial.print("] millis[");
 		Serial.print(millis());
 		Serial.print("]");
 		Serial.println();
 
+		//Now put the CCS811's logic engine to sleep
 		digitalWrite(PIN_NOT_WAKE, 1);
 		//Need to be asleep for at least 20 us
 		delay(1);
@@ -76,6 +120,11 @@ void loop()
 }
 
 
+//printDriverError decodes the status_t type and prints the
+//type of error to the serial terminal.
+//
+//Save the return value of any function of type status_t, then pass
+//to this function to see what the output was.
 void printDriverError( status_t errorCode )
 {
 	switch( errorCode )
@@ -92,17 +141,19 @@ void printDriverError( status_t errorCode )
 	case SENSOR_INTERNAL_ERROR:
 		Serial.print("INTERNAL_ERROR");
 		break;
+	case SENSOR_GENERIC_ERROR:
+		Serial.print("GENERIC_ERROR");
+		break;
 	default:
 		Serial.print("Unspecified error.");
 	}
 }
 
-//Displays the type of error
-//Calling this causes reading the contents of the ERROR register
-//This should clear the ERROR_ID register
+//printSensorError gets, clears, then prints the errors
+//saved within the error register.
 void printSensorError()
 {
-	uint8_t error = mySensor.getErrorRegister();
+	uint8_t error = myCCS811.getErrorRegister();
 
 	if( error == 0xFF )//comm error
 	{
