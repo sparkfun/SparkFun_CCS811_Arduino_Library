@@ -1,40 +1,40 @@
 /******************************************************************************
-BasicReadings.ino
+  BasicReadings.ino
 
-Marshall Taylor @ SparkFun Electronics
-Nathan Seidle @ SparkFun Electronics
+  Marshall Taylor @ SparkFun Electronics
+  Nathan Seidle @ SparkFun Electronics
 
-April 4, 2017
+  April 4, 2017
 
-https://github.com/sparkfun/CCS811_Air_Quality_Breakout
-https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
+  https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+  https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
-Read the TVOC and CO2 values from the SparkFun CSS811 breakout board
+  Read the TVOC and CO2 values from the SparkFun CSS811 breakout board
 
-This is the simplest example.  It throws away most error information and
-runs at the default 1 sample per second.
+  This is the simplest example.  It throws away most error information and
+  runs at the default 1 sample per second.
 
-A new sensor requires at 48-burn in. Once burned in a sensor requires 
-20 minutes of run in before readings are considered good.
+  A new sensor requires at 48-burn in. Once burned in a sensor requires
+  20 minutes of run in before readings are considered good.
 
-Hardware Connections (Breakoutboard to Arduino):
+  Hardware Connections (Breakoutboard to Arduino):
   3.3V to 3.3V pin
   GND to GND pin
   SDA to A4
   SCL to A5
 
-Resources:
-Uses Wire.h for i2c operation
+  Resources:
+  Uses Wire.h for i2c operation
 
-Development environment specifics:
-Arduino IDE 1.8.1
+  Development environment specifics:
+  Arduino IDE 1.8.1
 
-This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+  This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 
-Please review the LICENSE.md file included with this example. If you have any questions 
-or concerns with licensing, please contact techsupport@sparkfun.com.
+  Please review the LICENSE.md file included with this example. If you have any questions
+  or concerns with licensing, please contact techsupport@sparkfun.com.
 
-Distributed as-is; no warranty is given.
+  Distributed as-is; no warranty is given.
 ******************************************************************************/
 #include "SparkFunCCS811.h"
 
@@ -47,34 +47,34 @@ void setup()
 {
   Serial.begin(9600);
   Serial.println("CCS811 Basic Example");
-	
-	//It is recommended to check return status on .begin(), but it is not
-	//required.
-	status_t returnCode = mySensor.begin();
-	if(returnCode != SENSOR_SUCCESS)
-	{
-		Serial.println(".begin() returned with an error.");
-		while(1); //Hang if there was a problem.
-	}
+
+  //It is recommended to check return status on .begin(), but it is not
+  //required.
+  status_t returnCode = mySensor.begin();
+  if (returnCode != SENSOR_SUCCESS)
+  {
+    Serial.println(".begin() returned with an error.");
+    while (1); //Hang if there was a problem.
+  }
 }
 
 void loop()
 {
-	//Check to see if data is ready with .dataAvailable()
+  //Check to see if data is ready with .dataAvailable()
   if (mySensor.dataAvailable())
   {
-	  //If so, have the sensor read and calculate the results.
-	  //Get them later
+    //If so, have the sensor read and calculate the results.
+    //Get them later
     mySensor.readAlgorithmResults();
 
     Serial.print("CO2[");
-	//Returns calculated CO2 reading
+    //Returns calculated CO2 reading
     Serial.print(mySensor.getCO2());
     Serial.print("] tVOC[");
-	//Returns calculated TVOC reading
+    //Returns calculated TVOC reading
     Serial.print(mySensor.getTVOC());
     Serial.print("] millis[");
-	//Simply the time since program start
+    //Simply the time since program start
     Serial.print(millis());
     Serial.print("]");
     Serial.println();

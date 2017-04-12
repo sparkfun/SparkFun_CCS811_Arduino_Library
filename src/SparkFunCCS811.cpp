@@ -276,7 +276,7 @@ status_t CCS811::begin( void )
 	{
 		temp++;
 	}
-#elsif __AVR__
+#elif __AVR__
 	for( uint16_t i = 0; i < 16000; i++ ) //This waits > 1ms @ 16MHz clock
 	{
 		temp++;
