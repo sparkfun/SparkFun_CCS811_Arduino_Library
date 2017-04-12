@@ -1,13 +1,13 @@
 SparkFun CCS811 Arduino Library
 ========================================
 
-**BROKEN** ![CCS811 Breakout](https://www.sparkfun.com/)
+![SparkFun CCS811 Breakout](https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library/blob/master/extras/readme_picture.jpg)
 
-**BROKEN** [*CCS811 Breakout (SEN-XXXXX)*](https://www.sparkfun.com/)
+[*SparkFun CCS811 (SEN-14193)*](https://www.sparkfun.com/products/14193)
 
 This is an arduino IDE library to control the CCS811.
 
-This has been tested with Arduino Uno.
+This has been tested with Arduino Uno, ESP32, and Teensy 3.2 using Arduino 1.8.1.
 
 Repository Contents
 -------------------
@@ -21,28 +21,31 @@ Repository Contents
 Examples
 --------------
 
-* BasicReadings - 
-* Core - 
-* GetBaseline - 
-* setEnvironmentalReadings - 
-* TwentyMinuteTest - 
+* BaselineOperator - Save and restore baselines to the EEPROM
+* BasicReadings - Get data from the CCS811 as fast as possible
+* BME280Compensated - Compensate the CCS811 with data from your BME280 sensor
+* Core - Shows how the underlying hardware object works
+* NTCCompensated - Compensate the CCS811 with data from a supplied NTC Thermistor
+* setEnvironmentalReadings - Compensate the CCS with random data
+* TwentyMinuteTest - Report data with timestamp.
+* WakeAndInterrupt - Shows how to use the nWake and nInt pins
 
 Documentation
 --------------
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* **BROKEN** **[Product Repository](https://www.sparkfun.com/)** - Main repository (including hardware files) for the LIS3DH Breakout.
-* **BROKEN** **[Hookup Guide](https://www.sparkfun.com/)** - Basic hookup guide for the LIS3DH Breakout.
+* **[Product Repository](https://github.com/sparkfun/CCS811_Air_Quality_Breakout)** - Main repository (including hardware files) for the CCS811 Breakout.
+* **[Hookup Guide](https://learn.sparkfun.com/tutorials/ccs811-air-quality-breakout-hookup-guide)** - Basic hookup guide for the CCS811 Breakout.
 
 Products that use this Library 
 ---------------------------------
 
-* [SEN-XXXXX](https://www.sparkfun.com/)- CCS811 Breakout board
+* [SEN-14193](https://www.sparkfun.com/)- CCS811 Breakout board
 
 Version History
 ---------------
 
-* **BROKEN**[V 1.0.0](https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library/releases/tag/V_1.0.0) -- Initial commit of Arduino 1.6-compatible library.
+* [V 1.0.0](https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library/releases/tag/V_1.0.0) -- Initial commit of Arduino compatible library.
 
 License Information
 -------------------
