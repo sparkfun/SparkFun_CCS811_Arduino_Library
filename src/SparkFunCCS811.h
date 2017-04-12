@@ -24,8 +24,8 @@ or concerns with licensing, please contact techsupport@sparkfun.com.
 Distributed as-is; no warranty is given.
 ******************************************************************************/
 
-#ifndef __CCS811_IMU_H__
-#define __CCS811_IMU_H__
+#ifndef __CCS811_H__
+#define __CCS811_H__
 
 #include "stdint.h"
 
@@ -132,4 +132,4 @@ private:
 	float temperature;	
 };
 
-#endif  // End of __LIS3DH_IMU_H__ definition check
+#endif  // End of definition check
