@@ -63,7 +63,7 @@ void setup()
   Serial.println();
   Serial.println("CCS811 Baseline Example");
 
-  status_t returnCode = mySensor.begin();
+  CCS811Core::status returnCode = mySensor.begin();
   Serial.print("begin exited with: ");
   printDriverError( returnCode );
   Serial.println();
@@ -92,7 +92,7 @@ void loop()
   char c;
   unsigned int result;
   unsigned int baselineToApply;
-  status_t errorStatus;
+  CCS811Core::status errorStatus;
   if (Serial.available())
   {
     c = Serial.read();
@@ -123,7 +123,7 @@ void loop()
           Serial.println(baselineToApply, HEX);
           //This programs the baseline into the sensor and monitors error states
           errorStatus = mySensor.setBaseline( baselineToApply );
-          if ( errorStatus == SENSOR_SUCCESS )
+          if ( errorStatus == CCS811Core::SENSOR_SUCCESS )
           {
             Serial.println("Baseline written to CCS811.");
           }
@@ -170,28 +170,28 @@ void loop()
   delay(10);
 }
 
-//printDriverError decodes the status_t type and prints the
+//printDriverError decodes the CCS811Core::status type and prints the
 //type of error to the serial terminal.
 //
-//Save the return value of any function of type status_t, then pass
+//Save the return value of any function of type CCS811Core::status, then pass
 //to this function to see what the output was.
-void printDriverError( status_t errorCode )
+void printDriverError( CCS811Core::status errorCode )
 {
   switch ( errorCode )
   {
-    case SENSOR_SUCCESS:
+    case CCS811Core::SENSOR_SUCCESS:
       Serial.print("SUCCESS");
       break;
-    case SENSOR_ID_ERROR:
+    case CCS811Core::SENSOR_ID_ERROR:
       Serial.print("ID_ERROR");
       break;
-    case SENSOR_I2C_ERROR:
+    case CCS811Core::SENSOR_I2C_ERROR:
       Serial.print("I2C_ERROR");
       break;
-    case SENSOR_INTERNAL_ERROR:
+    case CCS811Core::SENSOR_INTERNAL_ERROR:
       Serial.print("INTERNAL_ERROR");
       break;
-    case SENSOR_GENERIC_ERROR:
+    case CCS811Core::SENSOR_GENERIC_ERROR:
       Serial.print("GENERIC_ERROR");
       break;
     default:

@@ -50,8 +50,8 @@ void setup()
 
   //It is recommended to check return status on .begin(), but it is not
   //required.
-  status_t returnCode = mySensor.begin();
-  if (returnCode != SENSOR_SUCCESS)
+  CCS811Core::status returnCode = mySensor.begin();
+  if (returnCode != CCS811Core::SENSOR_SUCCESS)
   {
     Serial.println(".begin() returned with an error.");
     while (1); //Hang if there was a problem.

@@ -48,9 +48,9 @@ CCS811Core::CCS811Core( uint8_t inputArg ) : I2CAddress(0x5B)
 
 }
 
-status_t CCS811Core::beginCore(void)
+CCS811Core::status CCS811Core::beginCore(void)
 {
-	status_t returnError = SENSOR_SUCCESS;
+	CCS811Core::status returnError = SENSOR_SUCCESS;
 
 	Wire.begin();
 
@@ -103,12 +103,12 @@ status_t CCS811Core::beginCore(void)
 //    *outputPointer -- Pass &variable (address of) to save read data to
 //
 //****************************************************************************//
-status_t CCS811Core::readRegister(uint8_t offset, uint8_t* outputPointer)
+CCS811Core::status CCS811Core::readRegister(uint8_t offset, uint8_t* outputPointer)
 {
 	//Return value
 	uint8_t result;
 	uint8_t numBytes = 1;
-	status_t returnError = SENSOR_SUCCESS;
+	CCS811Core::status returnError = SENSOR_SUCCESS;
 	Wire.beginTransmission(I2CAddress);
 	Wire.write(offset);
 	if( Wire.endTransmission() != 0 )
@@ -140,9 +140,9 @@ status_t CCS811Core::readRegister(uint8_t offset, uint8_t* outputPointer)
 //    other memory!
 //
 //****************************************************************************//
-status_t CCS811Core::multiReadRegister(uint8_t offset, uint8_t *outputPointer, uint8_t length)
+CCS811Core::status CCS811Core::multiReadRegister(uint8_t offset, uint8_t *outputPointer, uint8_t length)
 {
-	status_t returnError = SENSOR_SUCCESS;
+	CCS811Core::status returnError = SENSOR_SUCCESS;
 
 	//define pointer that will point to the external space
 	uint8_t i = 0;
@@ -185,8 +185,8 @@ status_t CCS811Core::multiReadRegister(uint8_t offset, uint8_t *outputPointer, u
 //    dataToWrite -- 8 bit data to write to register
 //
 //****************************************************************************//
-status_t CCS811Core::writeRegister(uint8_t offset, uint8_t dataToWrite) {
-	status_t returnError = SENSOR_SUCCESS;
+CCS811Core::status CCS811Core::writeRegister(uint8_t offset, uint8_t dataToWrite) {
+	CCS811Core::status returnError = SENSOR_SUCCESS;
 	
 	Wire.beginTransmission(I2CAddress);
 	Wire.write(offset);
@@ -213,9 +213,9 @@ status_t CCS811Core::writeRegister(uint8_t offset, uint8_t dataToWrite) {
 //    other memory!
 //
 //****************************************************************************//
-status_t CCS811Core::multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length)
+CCS811Core::status CCS811Core::multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length)
 {
-	status_t returnError = SENSOR_SUCCESS;
+	CCS811Core::status returnError = SENSOR_SUCCESS;
 	//define pointer that will point to the external space
 	uint8_t i = 0;
 	//Set the address
@@ -258,10 +258,10 @@ CCS811::CCS811( uint8_t inputArg ) : CCS811Core( inputArg )
 //  This starts the lower level begin, then applies settings
 //
 //****************************************************************************//
-status_t CCS811::begin( void )
+CCS811Core::status CCS811::begin( void )
 {
 	uint8_t data[4] = {0x11,0xE5,0x72,0x8A}; //Reset key
-	status_t returnError = SENSOR_SUCCESS; //Default error state
+	CCS811Core::status returnError = SENSOR_SUCCESS; //Default error state
 
 	//restart the core
 	returnError = beginCore();
@@ -313,10 +313,10 @@ status_t CCS811::begin( void )
 //Updates the total voltatile organic compounds (TVOC) in parts per billion (PPB)
 //and the CO2 value
 //Returns nothing
-status_t CCS811::readAlgorithmResults( void )
+CCS811Core::status CCS811::readAlgorithmResults( void )
 {
 	uint8_t data[4];
-	status_t returnError = multiReadRegister(CSS811_ALG_RESULT_DATA, data, 4);
+	CCS811Core::status returnError = multiReadRegister(CSS811_ALG_RESULT_DATA, data, 4);
 	if( returnError != SENSOR_SUCCESS ) return returnError;
 	// Data ordered:
 	// co2MSB, co2LSB, tvocMSB, tvocLSB
@@ -339,7 +339,7 @@ bool CCS811::checkForStatusError( void )
 bool CCS811::dataAvailable( void )
 {
 	uint8_t value;
-	status_t returnError = readRegister( CSS811_STATUS, &value );
+	CCS811Core::status returnError = readRegister( CSS811_STATUS, &value );
 	if( returnError != SENSOR_SUCCESS )
 	{
 		return 0;
@@ -354,7 +354,7 @@ bool CCS811::dataAvailable( void )
 bool CCS811::appValid( void )
 {
 	uint8_t value;
-	status_t returnError = readRegister( CSS811_STATUS, &value );
+	CCS811Core::status returnError = readRegister( CSS811_STATUS, &value );
 	if( returnError != SENSOR_SUCCESS )
 	{
 		return 0;
@@ -369,7 +369,7 @@ uint8_t CCS811::getErrorRegister( void )
 {
 	uint8_t value;
 	
-	status_t returnError = readRegister( CSS811_ERROR_ID, &value );
+	CCS811Core::status returnError = readRegister( CSS811_ERROR_ID, &value );
 	if( returnError != SENSOR_SUCCESS )
 	{
 		return 0xFF;
@@ -386,7 +386,7 @@ uint8_t CCS811::getErrorRegister( void )
 uint16_t CCS811::getBaseline( void )
 {
 	uint8_t data[2];
-	status_t returnError = multiReadRegister(CSS811_BASELINE, data, 2);
+	CCS811Core::status returnError = multiReadRegister(CSS811_BASELINE, data, 2);
 
 	unsigned int baseline = ((uint16_t)data[0] << 8) | data[1];
 	if( returnError != SENSOR_SUCCESS )
@@ -399,22 +399,22 @@ uint16_t CCS811::getBaseline( void )
 	}
 }
 
-status_t CCS811::setBaseline( uint16_t input )
+CCS811Core::status CCS811::setBaseline( uint16_t input )
 {
 	uint8_t data[2];
 	data[0] = (input >> 8) & 0x00FF;
 	data[1] = input & 0x00FF;
 	
-	status_t returnError = multiWriteRegister(CSS811_BASELINE, data, 2);
+	CCS811Core::status returnError = multiWriteRegister(CSS811_BASELINE, data, 2);
 	
 	return returnError;
 }
 
 //Enable the nINT signal
-status_t CCS811::enableInterrupts( void )
+CCS811Core::status CCS811::enableInterrupts( void )
 {
 	uint8_t value;
-	status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
+	CCS811Core::status returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
 	if(returnError != SENSOR_SUCCESS) return returnError;
 	Serial.println(value, HEX);
 	value |= (1 << 3); //Set INTERRUPT bit
@@ -424,10 +424,10 @@ status_t CCS811::enableInterrupts( void )
 }
 
 //Disable the nINT signal
-status_t CCS811::disableInterrupts( void )
+CCS811Core::status CCS811::disableInterrupts( void )
 {
 	uint8_t value;
-	status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
+	CCS811Core::status returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
 	if( returnError != SENSOR_SUCCESS ) return returnError;
 	value &= ~(1 << 3); //Clear INTERRUPT bit
 	returnError = writeRegister(CSS811_MEAS_MODE, value);
@@ -439,12 +439,12 @@ status_t CCS811::disableInterrupts( void )
 //Mode 2 = every 10s
 //Mode 3 = every 60s
 //Mode 4 = RAW mode
-status_t CCS811::setDriveMode( uint8_t mode )
+CCS811Core::status CCS811::setDriveMode( uint8_t mode )
 {
 	if (mode > 4) mode = 4; //sanitize input
 
 	uint8_t value;
-	status_t returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
+	CCS811Core::status returnError = readRegister( CSS811_MEAS_MODE, &value ); //Read what's currently there
 	if( returnError != SENSOR_SUCCESS ) return returnError;
 	value &= ~(0b00000111 << 4); //Clear DRIVE_MODE bits
 	value |= (mode << 4); //Mask in mode
@@ -454,7 +454,7 @@ status_t CCS811::setDriveMode( uint8_t mode )
 
 //Given a temp and humidity, write this data to the CSS811 for better compensation
 //This function expects the humidity and temp to come in as floats
-status_t CCS811::setEnvironmentalData( float relativeHumidity, float temperature )
+CCS811Core::status CCS811::setEnvironmentalData( float relativeHumidity, float temperature )
 {
 	//Check for invalid temperatures
 	if((temperature < -25)||(temperature > 50)) return SENSOR_GENERIC_ERROR;
@@ -483,7 +483,7 @@ status_t CCS811::setEnvironmentalData( float relativeHumidity, float temperature
 	{
 		envData[2] |= 1;  //Set 9th bit of fractional to indicate 0.5C
 	}
-	status_t returnError = multiWriteRegister(CSS811_ENV_DATA, envData, 4);
+	CCS811Core::status returnError = multiWriteRegister(CSS811_ENV_DATA, envData, 4);
 	return returnError;
 }
 
@@ -492,10 +492,10 @@ void CCS811::setRefResistance( float input )
 	refResistance = input;
 }
 
-status_t CCS811::readNTC( void )
+CCS811Core::status CCS811::readNTC( void )
 {
 	uint8_t data[4];
-	status_t returnError = multiReadRegister(CSS811_NTC, data, 4);
+	CCS811Core::status returnError = multiReadRegister(CSS811_NTC, data, 4);
 
 	vrefCounts = ((uint16_t)data[0] << 8) | data[1];
 	//Serial.print("vrefCounts: ");

@@ -51,26 +51,29 @@ void setup()
   Serial.println("CCS811 Core Example");
 
   //This setup routiene is similar to what is used in the subclass' .begin() function
-  status_t returnCode = mySensor.beginCore();
+  CCS811Core::status returnCode = mySensor.beginCore();
   Serial.print("beginCore exited with: ");
   switch ( returnCode )
   {
-    case SENSOR_SUCCESS:
-      Serial.println("SUCCESS");
+    case CCS811Core::SENSOR_SUCCESS:
+      Serial.print("SUCCESS");
       break;
-    case SENSOR_ID_ERROR:
-      Serial.println("ID_ERROR");
+    case CCS811Core::SENSOR_ID_ERROR:
+      Serial.print("ID_ERROR");
       break;
-    case SENSOR_I2C_ERROR:
-      Serial.println("I2C_ERROR");
+    case CCS811Core::SENSOR_I2C_ERROR:
+      Serial.print("I2C_ERROR");
       break;
-    case SENSOR_INTERNAL_ERROR:
-      Serial.println("INTERNAL_ERROR");
+    case CCS811Core::SENSOR_INTERNAL_ERROR:
+      Serial.print("INTERNAL_ERROR");
+      break;
+    case CCS811Core::SENSOR_GENERIC_ERROR:
+      Serial.print("GENERIC_ERROR");
       break;
     default:
-      Serial.println("Unspecified error.");
+      Serial.print("Unspecified error.");
   }
-
+  
   //Write to this register to start app
   Wire.beginTransmission(CCS811_ADDR);
   Wire.write(CSS811_APP_START);

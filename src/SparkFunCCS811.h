@@ -46,17 +46,6 @@ Distributed as-is; no warranty is given.
 #define CSS811_APP_START 0xF4
 #define CSS811_SW_RESET 0xFF
 
-// Return values 
-typedef enum
-{
-	SENSOR_SUCCESS,
-	SENSOR_ID_ERROR,
-	SENSOR_I2C_ERROR,
-	SENSOR_INTERNAL_ERROR,
-	SENSOR_GENERIC_ERROR
-	//...
-} status_t;
-
 //This is the core operational class of the driver.
 //  CCS811Core contains only read and write operations towards the sensor.
 //  To use the higher level functions, use the class CCS811 which inherits
@@ -65,26 +54,39 @@ typedef enum
 class CCS811Core
 {
 public:
+
+	// Return values 
+	typedef enum
+	{
+		SENSOR_SUCCESS,
+		SENSOR_ID_ERROR,
+		SENSOR_I2C_ERROR,
+		SENSOR_INTERNAL_ERROR,
+		SENSOR_GENERIC_ERROR
+		//...
+	} status;
+
+
 	CCS811Core( uint8_t );
 	~CCS811Core() = default;
 
-	status_t beginCore( void );
+	status beginCore( void );
 
 	//***Reading functions***//
 	
 	//readRegister reads one 8-bit register
-	status_t readRegister( uint8_t offset, uint8_t* outputPointer);
+	status readRegister( uint8_t offset, uint8_t* outputPointer);
 	//multiReadRegister takes a uint8 array address as input and performs
 	//  a number of consecutive reads
-	status_t multiReadRegister(uint8_t offset, uint8_t *outputPointer, uint8_t length);
+	status multiReadRegister(uint8_t offset, uint8_t *outputPointer, uint8_t length);
 
 	//***Writing functions***//
 	
 	//Writes an 8-bit byte;
-	status_t writeRegister(uint8_t offset, uint8_t dataToWrite);
+	status writeRegister(uint8_t offset, uint8_t dataToWrite);
 	//multiWriteRegister takes a uint8 array address as input and performs
 	//  a number of consecutive writes
-	status_t multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length);
+	status multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length);
 
 protected:
 	uint8_t I2CAddress;
@@ -101,21 +103,21 @@ public:
 	CCS811( uint8_t );
 
 	//Call to check for errors, start app, and set default mode 1
-	status_t begin( void );
+	status begin( void );
 
-	status_t readAlgorithmResults( void );
+	status readAlgorithmResults( void );
 	bool checkForStatusError( void );
 	bool dataAvailable( void );
 	bool appValid( void );
 	uint8_t getErrorRegister( void );
 	uint16_t getBaseline( void );
-	status_t setBaseline( uint16_t );
-	status_t enableInterrupts( void );
-	status_t disableInterrupts( void );
-	status_t setDriveMode( uint8_t mode );
-	status_t setEnvironmentalData( float relativeHumidity, float temperature );
+	status setBaseline( uint16_t );
+	status enableInterrupts( void );
+	status disableInterrupts( void );
+	status setDriveMode( uint8_t mode );
+	status setEnvironmentalData( float relativeHumidity, float temperature );
 	void setRefResistance( float );
-	status_t readNTC( void );
+	status readNTC( void );
 	uint16_t getTVOC( void );
 	uint16_t getCO2( void );
 	float getResistance( void );
