@@ -45,7 +45,7 @@ Products that use this Library
 Version History
 ---------------
 
-* [V 1.0.0](https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library/releases/tag/V_1.0.0) -- Initial commit of Arduino compatible library.
+* [V 1.0.0](https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library/tree/V_1.0.0) -- Initial commit of Arduino compatible library.
 
 License Information
 -------------------
