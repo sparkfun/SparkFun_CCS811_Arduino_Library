@@ -35,17 +35,13 @@ Distributed as-is; no warranty is given.
 
 //****************************************************************************//
 //
-//  LIS3DHCore functions
-//
-//  For I2C, construct LIS3DHCore myIMU(<address>);
+//  CCS811Core functions
 //
 //  Default <address> is 0x5B.
 //
 //****************************************************************************//
-CCS811Core::CCS811Core( uint8_t inputArg ) : I2CAddress(0x5B)
+CCS811Core::CCS811Core( uint8_t inputArg ) : I2CAddress(inputArg)
 {
-	I2CAddress = inputArg;
-
 }
 
 CCS811Core::status CCS811Core::beginCore(void)
