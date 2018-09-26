@@ -58,7 +58,7 @@ CCS811Core::status CCS811Core::beginCore(void)
 #else
 #endif
 
-#ifdef (ARDUINO_ARCH_ESP32 ARDUINO_ARCH_ESP8266)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
 	Wire.setClockStretchLimit(200000);// was defautl 230 uS, now 200ms
 #else
 #endif
