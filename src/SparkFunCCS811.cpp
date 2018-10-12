@@ -70,11 +70,6 @@ CCS811Core::status CCS811Core::beginCore(void)
 		temp++;
 	}
 
-	while ( Wire.available() ) //Clear wire as a precaution
-	{
-		Wire.read();
-	}
-	
 	//Check the ID register to determine if the operation was a success.
 	uint8_t readCheck;
 	readCheck = 0;
@@ -161,11 +156,6 @@ CCS811Core::status CCS811Core::multiReadRegister(uint8_t offset, uint8_t *output
 			*outputPointer = c;
 			outputPointer++;
 			i++;
-		}
-		//dump extra
-		while(Wire.available())
-		{
-			Wire.read();
 		}
 	}
 
@@ -268,6 +258,7 @@ CCS811Core::status CCS811::begin( void )
 	//Tclk = 1/16MHz = 0x0000000625
 	//0.001 s / tclk = 16000 counts
 	volatile uint8_t temp = 0;
+
 #ifdef ARDUINO_ARCH_ESP32
 	for( uint32_t i = 0; i < 80000; i++ ) //This waits > 1ms @ 80MHz clock
 	{
@@ -284,6 +275,7 @@ CCS811Core::status CCS811::begin( void )
 		temp++;
 	}	
 #endif
+
 	if( checkForStatusError() == true ) return SENSOR_INTERNAL_ERROR;
 	
 	if( appValid() == false ) return SENSOR_INTERNAL_ERROR;
