@@ -263,7 +263,12 @@ CCS811Core::status CCS811::begin( void )
 	//restart the core
 	returnError = beginCore();
 	if( returnError != SENSOR_SUCCESS ) return returnError;
-	//Reset the device
+	
+	// Without a delay here, the CCS811 and I2C can be put in a bad state.
+	// Seems to work with 50us delay, but make a bit longer to be sure.
+	delayMicroseconds(100);
+
+        //Reset the device
 	multiWriteRegister(CSS811_SW_RESET, data, 4);
 	//Tclk = 1/16MHz = 0x0000000625
 	//0.001 s / tclk = 16000 counts
@@ -295,6 +300,10 @@ CCS811Core::status CCS811::begin( void )
 	{
 		return SENSOR_I2C_ERROR;
 	}	
+	
+	// Without a delay here, the CCS811 and I2C can be put in a bad state.
+	// Seems to work with 50us delay, but make a bit longer to be sure.
+	delayMicroseconds(100);
 	
 	returnError = setDriveMode(1); //Read every second
 	
