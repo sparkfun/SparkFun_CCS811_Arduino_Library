@@ -296,6 +296,13 @@ CCS811Core::status CCS811::begin( void )
 		return SENSOR_I2C_ERROR;
 	}	
 	
+	//Added from issue 6
+	// Without a delay here, the CCS811 and I2C can be put in a bad state.
+	// Seems to work with 50us delay, but make a bit longer to be sure.
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
+	delayMicroseconds(100);
+#endif
+	
 	returnError = setDriveMode(1); //Read every second
 	
 	return returnError;
