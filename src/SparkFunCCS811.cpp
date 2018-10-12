@@ -103,7 +103,7 @@ CCS811Core::status CCS811Core::beginCore(void)
 CCS811Core::status CCS811Core::readRegister(uint8_t offset, uint8_t* outputPointer)
 {
 	//Return value
-	uint8_t result;
+	uint8_t result = 1;
 	uint8_t numBytes = 1;
 	CCS811Core::status returnError = SENSOR_SUCCESS;
 	Wire.beginTransmission(I2CAddress);
