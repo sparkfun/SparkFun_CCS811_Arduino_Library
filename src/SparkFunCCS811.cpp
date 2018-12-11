@@ -44,23 +44,22 @@ CCS811Core::CCS811Core( uint8_t inputArg ) : I2CAddress(inputArg)
 {
 }
 
-CCS811Core::status CCS811Core::beginCore(void)
+CCS811Core::status CCS811Core::beginCore(TwoWire &wirePort)
 {
 	CCS811Core::status returnError = SENSOR_SUCCESS;
+	
+	_i2cPort = &wirePort; //Pull in user's choice of I2C hardware
 
-	Wire.begin();
+	//Wire.begin(); //See issue 13 https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library/issues/13
 
 #ifdef __AVR__
-#else
 #endif
 
 #ifdef __MK20DX256__
-#else
 #endif
 
 #if defined(ARDUINO_ARCH_ESP8266)
-	Wire.setClockStretchLimit(200000);// was default 230 uS, now 200ms
-#else
+	_i2cPort->setClockStretchLimit(200000);// was default 230 uS, now 200ms
 #endif
 
 	//Spin for a few ms
@@ -101,16 +100,16 @@ CCS811Core::status CCS811Core::readRegister(uint8_t offset, uint8_t* outputPoint
 	uint8_t result = 1;
 	uint8_t numBytes = 1;
 	CCS811Core::status returnError = SENSOR_SUCCESS;
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
-	if( Wire.endTransmission() != 0 )
+	_i2cPort->beginTransmission(I2CAddress);
+	_i2cPort->write(offset);
+	if( _i2cPort->endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
-	Wire.requestFrom(I2CAddress, numBytes);
-	while ( Wire.available() ) // slave may send less than requested
+	_i2cPort->requestFrom(I2CAddress, numBytes);
+	while ( _i2cPort->available() ) // slave may send less than requested
 	{
-		result = Wire.read(); // receive a byte as a proper uint8_t
+		result = _i2cPort->read(); // receive a byte as a proper uint8_t
 	}
 	*outputPointer = result;
 
@@ -140,19 +139,19 @@ CCS811Core::status CCS811Core::multiReadRegister(uint8_t offset, uint8_t *output
 	uint8_t i = 0;
 	uint8_t c = 0;
 	//Set the address
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
-	if( Wire.endTransmission() != 0 )
+	_i2cPort->beginTransmission(I2CAddress);
+	_i2cPort->write(offset);
+	if( _i2cPort->endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
 	else  //OK, all worked, keep going
 	{
 		// request 6 bytes from slave device
-		Wire.requestFrom(I2CAddress, length);
-		while ( (Wire.available()) && (i < length))  // slave may send less than requested
+		_i2cPort->requestFrom(I2CAddress, length);
+		while ( (_i2cPort->available()) && (i < length))  // slave may send less than requested
 		{
-			c = Wire.read(); // receive a byte as character
+			c = _i2cPort->read(); // receive a byte as character
 			*outputPointer = c;
 			outputPointer++;
 			i++;
@@ -175,10 +174,10 @@ CCS811Core::status CCS811Core::multiReadRegister(uint8_t offset, uint8_t *output
 CCS811Core::status CCS811Core::writeRegister(uint8_t offset, uint8_t dataToWrite) {
 	CCS811Core::status returnError = SENSOR_SUCCESS;
 	
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
-	Wire.write(dataToWrite);
-	if( Wire.endTransmission() != 0 )
+	_i2cPort->beginTransmission(I2CAddress);
+	_i2cPort->write(offset);
+	_i2cPort->write(dataToWrite);
+	if( _i2cPort->endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
@@ -206,15 +205,15 @@ CCS811Core::status CCS811Core::multiWriteRegister(uint8_t offset, uint8_t *input
 	//define pointer that will point to the external space
 	uint8_t i = 0;
 	//Set the address
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(offset);
+	_i2cPort->beginTransmission(I2CAddress);
+	_i2cPort->write(offset);
 	while ( i < length )  // send data bytes
 	{
-		Wire.write(*inputPointer); // receive a byte as character
+		_i2cPort->write(*inputPointer); // receive a byte as character
 		inputPointer++;
 		i++;
 	}
-	if( Wire.endTransmission() != 0 )
+	if( _i2cPort->endTransmission() != 0 )
 	{
 		returnError = SENSOR_I2C_ERROR;
 	}
@@ -245,16 +244,18 @@ CCS811::CCS811( uint8_t inputArg ) : CCS811Core( inputArg )
 //  This starts the lower level begin, then applies settings
 //
 //****************************************************************************//
-CCS811Core::status CCS811::begin( void )
+CCS811Core::status CCS811::begin(TwoWire &wirePort)
 {
 	uint8_t data[4] = {0x11,0xE5,0x72,0x8A}; //Reset key
 	CCS811Core::status returnError = SENSOR_SUCCESS; //Default error state
 
 	//restart the core
-	returnError = beginCore();
+	returnError = beginCore(wirePort);
 	if( returnError != SENSOR_SUCCESS ) return returnError;
+
 	//Reset the device
 	multiWriteRegister(CSS811_SW_RESET, data, 4);
+
 	//Tclk = 1/16MHz = 0x0000000625
 	//0.001 s / tclk = 16000 counts
 	volatile uint8_t temp = 0;
@@ -281,9 +282,9 @@ CCS811Core::status CCS811::begin( void )
 	if( appValid() == false ) return SENSOR_INTERNAL_ERROR;
 	
 	//Write 0 bytes to this register to start app
-	Wire.beginTransmission(I2CAddress);
-	Wire.write(CSS811_APP_START);
-	if( Wire.endTransmission() != 0 )
+	_i2cPort->beginTransmission(I2CAddress);
+	_i2cPort->write(CSS811_APP_START);
+	if( _i2cPort->endTransmission() != 0 )
 	{
 		return SENSOR_I2C_ERROR;
 	}	

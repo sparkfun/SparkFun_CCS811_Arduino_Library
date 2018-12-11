@@ -28,6 +28,7 @@ Distributed as-is; no warranty is given.
 #define __CCS811_H__
 
 #include "stdint.h"
+#include <Wire.h>
 
 //Register addresses
 #define CSS811_STATUS 0x00
@@ -70,7 +71,7 @@ public:
 	CCS811Core( uint8_t );
 	~CCS811Core() = default;
 
-	status beginCore( void );
+	status beginCore(TwoWire &wirePort);
 
 	//***Reading functions***//
 	
@@ -89,6 +90,8 @@ public:
 	status multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length);
 
 protected:
+    //Variables
+    TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
 	uint8_t I2CAddress;
 };
 
@@ -103,7 +106,7 @@ public:
 	CCS811( uint8_t );
 
 	//Call to check for errors, start app, and set default mode 1
-	status begin( void );
+	status begin(TwoWire &wirePort = Wire); //Use the Wire hardware by default
 
 	status readAlgorithmResults( void );
 	bool checkForStatusError( void );
