@@ -1,5 +1,5 @@
 /******************************************************************************
-  Core.ino
+  Core
 
   Marshall Taylor @ SparkFun Electronics
 
@@ -118,4 +118,3 @@ void loop()
   Serial.println("\n");
   delay(1000); //Wait for next reading
 }
-

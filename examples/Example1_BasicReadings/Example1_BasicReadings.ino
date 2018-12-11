@@ -1,5 +1,5 @@
 /******************************************************************************
-  BasicReadings.ino
+  Read basic CO2 and TVOCs
 
   Marshall Taylor @ SparkFun Electronics
   Nathan Seidle @ SparkFun Electronics
@@ -36,6 +36,8 @@
 
   Distributed as-is; no warranty is given.
 ******************************************************************************/
+#include <Wire.h>
+
 #include "SparkFunCCS811.h"
 
 #define CCS811_ADDR 0x5B //Default I2C Address
@@ -47,6 +49,8 @@ void setup()
 {
   Serial.begin(9600);
   Serial.println("CCS811 Basic Example");
+
+  Wire.begin(); //Inialize I2C Harware
 
   //It is recommended to check return status on .begin(), but it is not
   //required.

@@ -1,5 +1,5 @@
 /******************************************************************************
-  TwentyMinuteTest.ino
+  Run for 20 minutes
 
   Nathan Seidle @ SparkFun Electronics
   Marshall Taylor @ SparkFun Electronics

@@ -1,5 +1,5 @@
 /******************************************************************************
-  BaselineOperator.ino
+  Adjust baseline
 
   Marshall Taylor @ SparkFun Electronics
 

@@ -1,5 +1,5 @@
 /******************************************************************************
-setEnvironmentalReadings.ino
+Sensitivity Demo
 
 Marshall Taylor @ SparkFun Electronics
 

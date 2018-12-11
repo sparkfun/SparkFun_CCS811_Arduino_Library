@@ -1,5 +1,5 @@
 /******************************************************************************
-  BME280Compensated.ino
+  Compensating the CCS811 with humidity readings from the BME280
 
   Marshall Taylor @ SparkFun Electronics
 

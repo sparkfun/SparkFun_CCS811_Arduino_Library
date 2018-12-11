@@ -1,5 +1,5 @@
 /******************************************************************************
-  WakeAndInterrupt.ino
+  Compensating with low-cost NTC thermistor
 
   Marshall Taylor @ SparkFun Electronics
 
@@ -8,27 +8,15 @@
   https://github.com/sparkfun/CCS811_Air_Quality_Breakout
   https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
-  This example configures the nWAKE and nINT pins.
-  The interrupt pin is configured to pull low when the data is
-  ready to be collected.
-  The wake pin is configured to enable the sensor during I2C communications
+  This example uses an NTC thermistor to gather temperature data that is then used
+  to compensate the CCS811.  (humidity defaulted at 50%)
 
   Hardware Connections (Breakoutboard to Arduino):
   3.3V to 3.3V pin
   GND to GND pin
   SDA to A4
   SCL to A5
-  NOT_INT to D6
-  NOT_WAKE to D5 (For 5V arduinos, use resistor divider)
-    D5---
-         |
-         R1 = 4.7K
-         |
-         --------NOT_WAKE
-         |
-         R2 = 4.7K
-         |
-        GND
+  SEN-00250 (NTCLE100E3103JB0) between NTC terminals
 
   Resources:
   Uses Wire.h for i2c operation
@@ -48,77 +36,69 @@
 #define CCS811_ADDR 0x5B //Default I2C Address
 //#define CCS811_ADDR 0x5A //Alternate I2C Address
 
-#define PIN_NOT_WAKE 5
-#define PIN_NOT_INT 6
-
 CCS811 myCCS811(CCS811_ADDR);
 
-//Global sensor object
-//---------------------------------------------------------------
 void setup()
 {
-  //Start the serial
   Serial.begin(9600);
   Serial.println();
-  Serial.println("...");
-
-  CCS811Core::status returnCode;
-
-  //This begins the CCS811 sensor and prints error status of .begin()
-  returnCode = myCCS811.begin();
+  Serial.println("Apply NTC data to CCS811 for compensation.");
+  CCS811Core::status returnCode = myCCS811.begin();
   Serial.print("CCS811 begin exited with: ");
   printDriverError( returnCode );
   Serial.println();
 
-  //This sets the mode to 60 second reads, and prints returned error status.
-  returnCode = myCCS811.setDriveMode(2);
-  Serial.print("Mode request exited with: ");
-  printDriverError( returnCode );
-  Serial.println();
-
-  //Configure and enable the interrupt line,
-  //then print error status
-  pinMode(PIN_NOT_INT, INPUT_PULLUP);
-  returnCode = myCCS811.enableInterrupts();
-  Serial.print("Interrupt configuation exited with: ");
-  printDriverError( returnCode );
-  Serial.println();
-
-  //Configure the wake line
-  pinMode(PIN_NOT_WAKE, OUTPUT);
-  digitalWrite(PIN_NOT_WAKE, 1); //Start asleep
+  myCCS811.setRefResistance( 9950 );
 
 }
-//---------------------------------------------------------------
+
 void loop()
 {
-  //Look for interrupt request from CCS811
-  if (digitalRead(PIN_NOT_INT) == 0)
+  if (myCCS811.dataAvailable())
   {
-    //Wake up the CCS811 logic engine
-    digitalWrite(PIN_NOT_WAKE, 0);
-    //Need to wait at least 50 us
-    delay(1);
-    //Interrupt signal caught, so cause the CCS811 to run its algorithm
     myCCS811.readAlgorithmResults(); //Calling this function updates the global tVOC and CO2 variables
 
-    Serial.print("CO2[");
+    Serial.println("CCS811 data:");
+    Serial.print(" CO2 concentration : ");
     Serial.print(myCCS811.getCO2());
-    Serial.print("] tVOC[");
+    Serial.println(" ppm");
+
+    Serial.print(" TVOC concentration : ");
     Serial.print(myCCS811.getTVOC());
-    Serial.print("] millis[");
-    Serial.print(millis());
-    Serial.print("]");
+    Serial.println(" ppb");
+
+    //.readNTC() causes the CCS811 library to gather ADC data and save value
+    myCCS811.readNTC();
+    Serial.print(" Measured resistance : ");
+    //After .readNTC() is called, .getResistance() can be called to actually
+    //get the resistor value.  This is not needed to get the temperature,
+    //but can be useful information for debugging.
+    //
+    //Use the resistance value for custom thermistors, and calculate the
+    //temperature yourself.
+    Serial.print( myCCS811.getResistance() );
+    Serial.println(" ohms");
+
+    //After .readNTC() is called, .getTemperature() can be called to get
+    //a temperature value providing that part SEN-00250 is used in the
+    //NTC terminals. (NTCLE100E3103JB0)
+    Serial.print(" Converted temperature : ");
+    float readTemperature = myCCS811.getTemperature();
+    Serial.print( readTemperature, 2);
+    Serial.println(" deg C");
+
+    //Pass the temperature back into the CCS811 to compensate
+    myCCS811.setEnvironmentalData( 50, readTemperature);
+
     Serial.println();
-
-    //Now put the CCS811's logic engine to sleep
-    digitalWrite(PIN_NOT_WAKE, 1);
-    //Need to be asleep for at least 20 us
-    delay(1);
   }
-  delay(1); //cycle kinda fast
-}
+  else if (myCCS811.checkForStatusError())
+  {
+    printSensorError();
+  }
 
+  delay(10); //Don't spam the I2C bus
+}
 
 //printDriverError decodes the CCS811Core::status type and prints the
 //type of error to the serial terminal.
