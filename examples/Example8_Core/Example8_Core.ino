@@ -37,7 +37,8 @@
   Distributed as-is; no warranty is given.
 ******************************************************************************/
 #include <Wire.h>
-#include "SparkFunCCS811.h"
+
+#include "SparkFunCCS811.h" //Click here to get the library: http://librarymanager/All#SparkFun_CCS811
 
 #define CCS811_ADDR 0x5B //Default I2C Address
 //#define CCS811_ADDR 0x5A //Alternate I2C Address
@@ -50,8 +51,10 @@ void setup()
   Serial.println();
   Serial.println("CCS811 Core Example");
 
-  //This setup routiene is similar to what is used in the subclass' .begin() function
-  CCS811Core::status returnCode = mySensor.beginCore();
+  Wire.begin();
+
+  //This setup routine is similar to what is used in the subclass' .begin() function
+  CCS811Core::status returnCode = mySensor.beginCore(Wire); //Pass in the Wire port you want to use
   Serial.print("beginCore exited with: ");
   switch ( returnCode )
   {

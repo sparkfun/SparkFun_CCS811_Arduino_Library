@@ -1,41 +1,41 @@
 /******************************************************************************
-Sensitivity Demo
+  Sensitivity Demo
 
-Marshall Taylor @ SparkFun Electronics
+  Marshall Taylor @ SparkFun Electronics
 
-April 4, 2017
+  April 4, 2017
 
-https://github.com/sparkfun/CCS811_Air_Quality_Breakout
-https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
+  https://github.com/sparkfun/CCS811_Air_Quality_Breakout
+  https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
-Hardware Connections (Breakoutboard to Arduino):
+  Hardware Connections (Breakoutboard to Arduino):
   3.3V to 3.3V pin
   GND to GND pin
   SDA to A4
   SCL to A5
 
-Generates random temperature and humidity data, and uses it to compensate the CCS811.
-This just demonstrates how the algorithm responds to various compensation points.
-Use NTCCompensated or BME280Compensated for real-world examples.
-  
-Resources:
-Uses Wire.h for i2c operation
+  Generates random temperature and humidity data, and uses it to compensate the CCS811.
+  This just demonstrates how the algorithm responds to various compensation points.
+  Use NTCCompensated or BME280Compensated for real-world examples.
 
-Development environment specifics:
-Arduino IDE 1.8.1
+  Resources:
+  Uses Wire.h for i2c operation
 
-This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+  Development environment specifics:
+  Arduino IDE 1.8.1
 
-Please review the LICENSE.md file included with this example. If you have any questions 
-or concerns with licensing, please contact techsupport@sparkfun.com.
+  This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 
-Distributed as-is; no warranty is given.
+  Please review the LICENSE.md file included with this example. If you have any questions
+  or concerns with licensing, please contact techsupport@sparkfun.com.
+
+  Distributed as-is; no warranty is given.
 ******************************************************************************/
 float temperatureVariable = 25.0; //in degrees C
 float humidityVariable = 65.0; //in % relative
 
 #include <Wire.h>
-#include "SparkFunCCS811.h"
+#include "SparkFunCCS811.h" //Click here to get the library: http://librarymanager/All#SparkFun_CCS811
 
 #define CCS811_ADDR 0x5B //Default I2C Address
 //#define CCS811_ADDR 0x5A //Alternate I2C Address
@@ -44,59 +44,61 @@ CCS811 myCCS811(CCS811_ADDR);
 
 void setup()
 {
-	Serial.begin(9600);
-	Serial.println("CCS811 EnvironmentalReadings Example");
+  Serial.begin(9600);
+  Serial.println("CCS811 EnvironmentalReadings Example");
 
-	//This begins the CCS811 sensor and prints error status of .begin()
-	CCS811Core::status returnCode = myCCS811.begin();
-	Serial.print("begin exited with: ");
-	printDriverError( returnCode );
-	Serial.println();
+  Wire.begin();
+
+  //This begins the CCS811 sensor and prints error status of .begin()
+  CCS811Core::status returnCode = myCCS811.begin();
+  Serial.print("begin exited with: ");
+  printDriverError( returnCode );
+  Serial.println();
 
 }
 
 void loop()
 {
-	Serial.println();
-	//Randomize the Temperature and Humidity
-	humidityVariable = (float)random(0, 10000)/100; //0 to 100%
-	temperatureVariable = (float)random(500, 7000)/100; // 5C to 70C
-	Serial.println("New humidity and temperature:");
-	Serial.print("  Humidity: ");
-	Serial.print(humidityVariable, 2);
-	Serial.println("% relative");
-	Serial.print("  Temperature: ");
-	Serial.print(temperatureVariable, 2);
-	Serial.println(" degrees C");
-	myCCS811.setEnvironmentalData(humidityVariable, temperatureVariable);
+  Serial.println();
+  //Randomize the Temperature and Humidity
+  humidityVariable = (float)random(0, 10000) / 100; //0 to 100%
+  temperatureVariable = (float)random(500, 7000) / 100; // 5C to 70C
+  Serial.println("New humidity and temperature:");
+  Serial.print("  Humidity: ");
+  Serial.print(humidityVariable, 2);
+  Serial.println("% relative");
+  Serial.print("  Temperature: ");
+  Serial.print(temperatureVariable, 2);
+  Serial.println(" degrees C");
+  myCCS811.setEnvironmentalData(humidityVariable, temperatureVariable);
 
-	Serial.println("Environmental data applied!");
-	myCCS811.readAlgorithmResults(); //Dump a reading and wait
-	delay(1000);
-	//Print data points
-	for( int i = 0; i < 10; i++)
-	{
-		if (myCCS811.dataAvailable())
-		{
-			//Calling readAlgorithmResults() function updates the global tVOC and CO2 variables
-			myCCS811.readAlgorithmResults();
+  Serial.println("Environmental data applied!");
+  myCCS811.readAlgorithmResults(); //Dump a reading and wait
+  delay(1000);
+  //Print data points
+  for ( int i = 0; i < 10; i++)
+  {
+    if (myCCS811.dataAvailable())
+    {
+      //Calling readAlgorithmResults() function updates the global tVOC and CO2 variables
+      myCCS811.readAlgorithmResults();
 
-			Serial.print("CO2[");
-			Serial.print(myCCS811.getCO2());
-			Serial.print("] tVOC[");
-			Serial.print(myCCS811.getTVOC());
-			Serial.print("] millis[");
-			Serial.print(millis());
-			Serial.print("]");
-			Serial.println();
-		}
-		else if (myCCS811.checkForStatusError())
-		{
-			//If the CCS811 found an internal error, print it.
-			printSensorError();
-		}
-		delay(1000); //Wait for next reading
-	}
+      Serial.print("CO2[");
+      Serial.print(myCCS811.getCO2());
+      Serial.print("] tVOC[");
+      Serial.print(myCCS811.getTVOC());
+      Serial.print("] millis[");
+      Serial.print(millis());
+      Serial.print("]");
+      Serial.println();
+    }
+    else if (myCCS811.checkForStatusError())
+    {
+      //If the CCS811 found an internal error, print it.
+      printSensorError();
+    }
+    delay(1000); //Wait for next reading
+  }
 }
 
 
@@ -138,21 +140,21 @@ void printDriverError( CCS811Core::status errorCode )
 //saved within the error register.
 void printSensorError()
 {
-	uint8_t error = myCCS811.getErrorRegister();
+  uint8_t error = myCCS811.getErrorRegister();
 
-	if( error == 0xFF )//comm error
-	{
-		Serial.println("Failed to get ERROR_ID register.");
-	}
-	else
-	{
-		Serial.print("Error: ");
-		if (error & 1 << 5) Serial.print("HeaterSupply");
-		if (error & 1 << 4) Serial.print("HeaterFault");
-		if (error & 1 << 3) Serial.print("MaxResistance");
-		if (error & 1 << 2) Serial.print("MeasModeInvalid");
-		if (error & 1 << 1) Serial.print("ReadRegInvalid");
-		if (error & 1 << 0) Serial.print("MsgInvalid");
-		Serial.println();
-	}
+  if ( error == 0xFF ) //comm error
+  {
+    Serial.println("Failed to get ERROR_ID register.");
+  }
+  else
+  {
+    Serial.print("Error: ");
+    if (error & 1 << 5) Serial.print("HeaterSupply");
+    if (error & 1 << 4) Serial.print("HeaterFault");
+    if (error & 1 << 3) Serial.print("MaxResistance");
+    if (error & 1 << 2) Serial.print("MeasModeInvalid");
+    if (error & 1 << 1) Serial.print("ReadRegInvalid");
+    if (error & 1 << 0) Serial.print("MsgInvalid");
+    Serial.println();
+  }
 }

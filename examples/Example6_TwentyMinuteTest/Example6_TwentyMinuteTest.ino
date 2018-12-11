@@ -35,7 +35,9 @@
 
   Distributed as-is; no warranty is given.
 ******************************************************************************/
-#include "SparkFunCCS811.h"
+#include <Wire.h>
+
+#include "SparkFunCCS811.h" //Click here to get the library: http://librarymanager/All#SparkFun_CCS811
 
 #define CCS811_ADDR 0x5B //Default I2C Address
 //#define CCS811_ADDR 0x5A //Alternate I2C Address
@@ -46,6 +48,8 @@ void setup()
 {
   Serial.begin(9600);
   Serial.println("20 minute test");
+
+  Wire.begin();
 
   //This begins the CCS811 sensor and prints error status of .begin()
   CCS811Core::status returnCode = myCCS811.begin();

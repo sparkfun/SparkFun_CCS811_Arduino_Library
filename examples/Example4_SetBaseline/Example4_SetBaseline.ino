@@ -49,7 +49,8 @@
 
   Distributed as-is; no warranty is given.
 ******************************************************************************/
-#include <SparkFunCCS811.h>
+#include <Wire.h>
+#include <SparkFunCCS811.h> //Click here to get the library: http://librarymanager/All#SparkFun_CCS811
 #include <EEPROM.h>
 
 #define CCS811_ADDR 0x5B //Default I2C Address
@@ -62,6 +63,8 @@ void setup()
   Serial.begin(9600);
   Serial.println();
   Serial.println("CCS811 Baseline Example");
+
+  Wire.begin();
 
   CCS811Core::status returnCode = mySensor.begin();
   Serial.print("begin exited with: ");
