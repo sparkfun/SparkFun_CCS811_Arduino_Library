@@ -55,43 +55,42 @@ Distributed as-is; no warranty is given.
 class CCS811Core
 {
 public:
-
-	// Return values 
+	// Return values
 	typedef enum
 	{
-		SENSOR_SUCCESS,
-		SENSOR_ID_ERROR,
-		SENSOR_I2C_ERROR,
-		SENSOR_INTERNAL_ERROR,
-		SENSOR_GENERIC_ERROR
+		CCS811_Stat_SUCCESS,
+		CCS811_Stat_ID_ERROR,
+		CCS811_Stat_I2C_ERROR,
+		CCS811_Stat_INTERNAL_ERROR,
+		CCS811_Stat_NUM,
+		CCS811_Stat_GENERIC_ERROR
 		//...
-	} status;
+	} CCS811_Status_e;
 
-
-	CCS811Core( uint8_t );
+	CCS811Core(uint8_t);
 	~CCS811Core() = default;
 
-	status beginCore(TwoWire &wirePort);
+	CCS811_Status_e beginCore(TwoWire &wirePort);
 
 	//***Reading functions***//
-	
+
 	//readRegister reads one 8-bit register
-	status readRegister( uint8_t offset, uint8_t* outputPointer);
+	CCS811_Status_e readRegister(uint8_t offset, uint8_t *outputPointer);
 	//multiReadRegister takes a uint8 array address as input and performs
 	//  a number of consecutive reads
-	status multiReadRegister(uint8_t offset, uint8_t *outputPointer, uint8_t length);
+	CCS811_Status_e multiReadRegister(uint8_t offset, uint8_t *outputPointer, uint8_t length);
 
 	//***Writing functions***//
-	
+
 	//Writes an 8-bit byte;
-	status writeRegister(uint8_t offset, uint8_t dataToWrite);
+	CCS811_Status_e writeRegister(uint8_t offset, uint8_t dataToWrite);
 	//multiWriteRegister takes a uint8 array address as input and performs
 	//  a number of consecutive writes
-	status multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length);
+	CCS811_Status_e multiWriteRegister(uint8_t offset, uint8_t *inputPointer, uint8_t length);
 
 protected:
-    //Variables
-    TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
+	//Variables
+	TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
 	uint8_t I2CAddress;
 };
 
@@ -103,29 +102,30 @@ protected:
 class CCS811 : public CCS811Core
 {
 public:
-	CCS811( uint8_t );
+	CCS811(uint8_t);
 
 	//Call to check for errors, start app, and set default mode 1
-	status begin(TwoWire &wirePort = Wire); //Use the Wire hardware by default
+	CCS811_Status_e begin(TwoWire &wirePort = Wire);				  //Use the Wire hardware by default
+	const char *statusString(CCS811_Status_e stat = CCS811_Stat_NUM); // Returns a human-readable status message. Defaults to status member, but prints string for supplied status if supplied
 
-	status readAlgorithmResults( void );
-	bool checkForStatusError( void );
-	bool dataAvailable( void );
-	bool appValid( void );
-	uint8_t getErrorRegister( void );
-	uint16_t getBaseline( void );
-	status setBaseline( uint16_t );
-	status enableInterrupts( void );
-	status disableInterrupts( void );
-	status setDriveMode( uint8_t mode );
-	status setEnvironmentalData( float relativeHumidity, float temperature );
-	void setRefResistance( float );
-	status readNTC( void );
-	uint16_t getTVOC( void );
-	uint16_t getCO2( void );
-	float getResistance( void );
-	float getTemperature( void );
-	
+	CCS811_Status_e readAlgorithmResults(void);
+	bool checkForStatusError(void);
+	bool dataAvailable(void);
+	bool appValid(void);
+	uint8_t getErrorRegister(void);
+	uint16_t getBaseline(void);
+	CCS811_Status_e setBaseline(uint16_t);
+	CCS811_Status_e enableInterrupts(void);
+	CCS811_Status_e disableInterrupts(void);
+	CCS811_Status_e setDriveMode(uint8_t mode);
+	CCS811_Status_e setEnvironmentalData(float relativeHumidity, float temperature);
+	void setRefResistance(float);
+	CCS811_Status_e readNTC(void);
+	uint16_t getTVOC(void);
+	uint16_t getCO2(void);
+	float getResistance(void);
+	float getTemperature(void);
+
 private:
 	//These are the air quality values obtained from the sensor
 	float refResistance;
@@ -134,7 +134,7 @@ private:
 	uint16_t CO2;
 	uint16_t vrefCounts = 0;
 	uint16_t ntcCounts = 0;
-	float temperature;	
+	float temperature;
 };
 
-#endif  // End of definition check
+#endif // End of definition check
