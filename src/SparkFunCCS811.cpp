@@ -429,10 +429,8 @@ CCS811Core::CCS811_Status_e CCS811::enableInterrupts(void)
 	CCS811Core::CCS811_Status_e returnError = readRegister(CSS811_MEAS_MODE, &value); //Read what's currently there
 	if (returnError != CCS811_Stat_SUCCESS)
 		return returnError;
-	Serial.println(value, HEX);
 	value |= (1 << 3); //Set INTERRUPT bit
 	writeRegister(CSS811_MEAS_MODE, value);
-	Serial.println(value, HEX);
 	return returnError;
 }
 
