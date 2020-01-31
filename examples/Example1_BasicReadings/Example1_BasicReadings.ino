@@ -11,9 +11,6 @@
 
   Read the TVOC and CO2 values from the SparkFun CSS811 breakout board
 
-  This is the simplest example.  It throws away most error information and
-  runs at the default 1 sample per second.
-
   A new sensor requires at 48-burn in. Once burned in a sensor requires
   20 minutes of run in before readings are considered good.
 
@@ -23,18 +20,6 @@
   SDA to A4
   SCL to A5
 
-  Resources:
-  Uses Wire.h for i2c operation
-
-  Development environment specifics:
-  Arduino IDE 1.8.1
-
-  This code is released under the [MIT License](http://opensource.org/licenses/MIT).
-
-  Please review the LICENSE.md file included with this example. If you have any questions
-  or concerns with licensing, please contact techsupport@sparkfun.com.
-
-  Distributed as-is; no warranty is given.
 ******************************************************************************/
 #include <Wire.h>
 
@@ -52,14 +37,11 @@ void setup()
 
   Wire.begin(); //Inialize I2C Hardware
 
-  //It is recommended to check return status on .begin(), but it is not
-  //required.
-  CCS811Core::status returnCode = mySensor.begin();
-  if (returnCode != CCS811Core::SENSOR_SUCCESS)
+  if (mySensor.begin() == false)
   {
-    Serial.println(".begin() returned with an error.");
+    Serial.print("CCS811 error. Please check wiring. Freezing...");
     while (1)
-      ; //Hang if there was a problem.
+      ;
   }
 }
 
@@ -79,7 +61,7 @@ void loop()
     //Returns calculated TVOC reading
     Serial.print(mySensor.getTVOC());
     Serial.print("] millis[");
-    //Simply the time since program start
+    //Display the time since program start
     Serial.print(millis());
     Serial.print("]");
     Serial.println();
