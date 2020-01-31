@@ -32,7 +32,7 @@
   Distributed as-is; no warranty is given.
 ******************************************************************************/
 float temperatureVariable = 25.0; //in degrees C
-float humidityVariable = 65.0; //in % relative
+float humidityVariable = 65.0;    //in % relative
 
 #include <Wire.h>
 #include "SparkFunCCS811.h" //Click here to get the library: http://librarymanager/All#SparkFun_CCS811
@@ -44,7 +44,7 @@ CCS811 myCCS811(CCS811_ADDR);
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("CCS811 EnvironmentalReadings Example");
 
   Wire.begin();
@@ -52,16 +52,15 @@ void setup()
   //This begins the CCS811 sensor and prints error status of .begin()
   CCS811Core::status returnCode = myCCS811.begin();
   Serial.print("begin exited with: ");
-  printDriverError( returnCode );
+  printDriverError(returnCode);
   Serial.println();
-
 }
 
 void loop()
 {
   Serial.println();
   //Randomize the Temperature and Humidity
-  humidityVariable = (float)random(0, 10000) / 100; //0 to 100%
+  humidityVariable = (float)random(0, 10000) / 100;     //0 to 100%
   temperatureVariable = (float)random(500, 7000) / 100; // 5C to 70C
   Serial.println("New humidity and temperature:");
   Serial.print("  Humidity: ");
@@ -76,7 +75,7 @@ void loop()
   myCCS811.readAlgorithmResults(); //Dump a reading and wait
   delay(1000);
   //Print data points
-  for ( int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++)
   {
     if (myCCS811.dataAvailable())
     {
@@ -101,7 +100,6 @@ void loop()
   }
 }
 
-
 //printDriverError decodes the CCS811Core::status type and prints the
 //type of error to the serial terminal.
 //
@@ -112,27 +110,27 @@ void loop()
 //
 //Save the return value of any function of type CCS811Core::status, then pass
 //to this function to see what the output was.
-void printDriverError( CCS811Core::status errorCode )
+void printDriverError(CCS811Core::status errorCode)
 {
-  switch ( errorCode )
+  switch (errorCode)
   {
-    case CCS811Core::SENSOR_SUCCESS:
-      Serial.print("SUCCESS");
-      break;
-    case CCS811Core::SENSOR_ID_ERROR:
-      Serial.print("ID_ERROR");
-      break;
-    case CCS811Core::SENSOR_I2C_ERROR:
-      Serial.print("I2C_ERROR");
-      break;
-    case CCS811Core::SENSOR_INTERNAL_ERROR:
-      Serial.print("INTERNAL_ERROR");
-      break;
-    case CCS811Core::SENSOR_GENERIC_ERROR:
-      Serial.print("GENERIC_ERROR");
-      break;
-    default:
-      Serial.print("Unspecified error.");
+  case CCS811Core::SENSOR_SUCCESS:
+    Serial.print("SUCCESS");
+    break;
+  case CCS811Core::SENSOR_ID_ERROR:
+    Serial.print("ID_ERROR");
+    break;
+  case CCS811Core::SENSOR_I2C_ERROR:
+    Serial.print("I2C_ERROR");
+    break;
+  case CCS811Core::SENSOR_INTERNAL_ERROR:
+    Serial.print("INTERNAL_ERROR");
+    break;
+  case CCS811Core::SENSOR_GENERIC_ERROR:
+    Serial.print("GENERIC_ERROR");
+    break;
+  default:
+    Serial.print("Unspecified error.");
   }
 }
 
@@ -142,19 +140,25 @@ void printSensorError()
 {
   uint8_t error = myCCS811.getErrorRegister();
 
-  if ( error == 0xFF ) //comm error
+  if (error == 0xFF) //comm error
   {
     Serial.println("Failed to get ERROR_ID register.");
   }
   else
   {
     Serial.print("Error: ");
-    if (error & 1 << 5) Serial.print("HeaterSupply");
-    if (error & 1 << 4) Serial.print("HeaterFault");
-    if (error & 1 << 3) Serial.print("MaxResistance");
-    if (error & 1 << 2) Serial.print("MeasModeInvalid");
-    if (error & 1 << 1) Serial.print("ReadRegInvalid");
-    if (error & 1 << 0) Serial.print("MsgInvalid");
+    if (error & 1 << 5)
+      Serial.print("HeaterSupply");
+    if (error & 1 << 4)
+      Serial.print("HeaterFault");
+    if (error & 1 << 3)
+      Serial.print("MaxResistance");
+    if (error & 1 << 2)
+      Serial.print("MeasModeInvalid");
+    if (error & 1 << 1)
+      Serial.print("ReadRegInvalid");
+    if (error & 1 << 0)
+      Serial.print("MsgInvalid");
     Serial.println();
   }
 }

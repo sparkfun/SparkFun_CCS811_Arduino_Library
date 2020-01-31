@@ -47,7 +47,7 @@ CCS811Core mySensor(CCS811_ADDR);
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println();
   Serial.println("CCS811 Core Example");
 
@@ -56,32 +56,31 @@ void setup()
   //This setup routine is similar to what is used in the subclass' .begin() function
   CCS811Core::status returnCode = mySensor.beginCore(Wire); //Pass in the Wire port you want to use
   Serial.print("beginCore exited with: ");
-  switch ( returnCode )
+  switch (returnCode)
   {
-    case CCS811Core::SENSOR_SUCCESS:
-      Serial.print("SUCCESS");
-      break;
-    case CCS811Core::SENSOR_ID_ERROR:
-      Serial.print("ID_ERROR");
-      break;
-    case CCS811Core::SENSOR_I2C_ERROR:
-      Serial.print("I2C_ERROR");
-      break;
-    case CCS811Core::SENSOR_INTERNAL_ERROR:
-      Serial.print("INTERNAL_ERROR");
-      break;
-    case CCS811Core::SENSOR_GENERIC_ERROR:
-      Serial.print("GENERIC_ERROR");
-      break;
-    default:
-      Serial.print("Unspecified error.");
+  case CCS811Core::SENSOR_SUCCESS:
+    Serial.print("SUCCESS");
+    break;
+  case CCS811Core::SENSOR_ID_ERROR:
+    Serial.print("ID_ERROR");
+    break;
+  case CCS811Core::SENSOR_I2C_ERROR:
+    Serial.print("I2C_ERROR");
+    break;
+  case CCS811Core::SENSOR_INTERNAL_ERROR:
+    Serial.print("INTERNAL_ERROR");
+    break;
+  case CCS811Core::SENSOR_GENERIC_ERROR:
+    Serial.print("GENERIC_ERROR");
+    break;
+  default:
+    Serial.print("Unspecified error.");
   }
-  
+
   //Write to this register to start app
   Wire.beginTransmission(CCS811_ADDR);
   Wire.write(CSS811_APP_START);
   Wire.endTransmission();
-
 }
 
 void loop()
@@ -103,7 +102,7 @@ void loop()
 
   mySensor.multiReadRegister(0x11, tempData, 3);
 
-  for ( int i = 0; i < arraySize; i++)
+  for (int i = 0; i < arraySize; i++)
   {
     if (i % 8 == 0)
     {
@@ -116,7 +115,6 @@ void loop()
     Serial.print(tempData[i], HEX);
     Serial.print(" ");
   }
-
 
   Serial.println("\n");
   delay(1000); //Wait for next reading

@@ -60,7 +60,7 @@ CCS811 mySensor(CCS811_ADDR);
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println();
   Serial.println("CCS811 Baseline Example");
 
@@ -68,7 +68,7 @@ void setup()
 
   CCS811Core::status returnCode = mySensor.begin();
   Serial.print("begin exited with: ");
-  printDriverError( returnCode );
+  printDriverError(returnCode);
   Serial.println();
 
   //This looks for previously saved data in the eeprom at program start
@@ -87,7 +87,6 @@ void setup()
   Serial.println(" 'l' - load and apply baseline from EEPROM");
   Serial.println(" 'c' - clear baseline from EEPROM");
   Serial.println(" 'r' - read and print sensor data");
-
 }
 
 void loop()
@@ -101,73 +100,77 @@ void loop()
     c = Serial.read();
     switch (c)
     {
-      case 's':
-        //This gets the latest baseline from the sensor
-        result = mySensor.getBaseline();
-        Serial.print("baseline for this sensor: 0x");
-        if (result < 0x100) Serial.print("0");
-        if (result < 0x10) Serial.print("0");
-        Serial.println(result, HEX);
-        //The baseline is saved (with valid data indicator bytes)
-        EEPROM.write(0, 0xA5);
-        EEPROM.write(1, 0xB2);
-        EEPROM.write(2, (result >> 8) & 0x00FF);
-        EEPROM.write(3, result & 0x00FF);
-        break;
-      case 'l':
-        if ((EEPROM.read(0) == 0xA5) && (EEPROM.read(1) == 0xB2))
+    case 's':
+      //This gets the latest baseline from the sensor
+      result = mySensor.getBaseline();
+      Serial.print("baseline for this sensor: 0x");
+      if (result < 0x100)
+        Serial.print("0");
+      if (result < 0x10)
+        Serial.print("0");
+      Serial.println(result, HEX);
+      //The baseline is saved (with valid data indicator bytes)
+      EEPROM.write(0, 0xA5);
+      EEPROM.write(1, 0xB2);
+      EEPROM.write(2, (result >> 8) & 0x00FF);
+      EEPROM.write(3, result & 0x00FF);
+      break;
+    case 'l':
+      if ((EEPROM.read(0) == 0xA5) && (EEPROM.read(1) == 0xB2))
+      {
+        Serial.println("EEPROM contains saved data.");
+        //The recovered baseline is packed into a 16 bit word
+        baselineToApply = ((unsigned int)EEPROM.read(2) << 8) | EEPROM.read(3);
+        Serial.print("Saved baseline: 0x");
+        if (baselineToApply < 0x100)
+          Serial.print("0");
+        if (baselineToApply < 0x10)
+          Serial.print("0");
+        Serial.println(baselineToApply, HEX);
+        //This programs the baseline into the sensor and monitors error states
+        errorStatus = mySensor.setBaseline(baselineToApply);
+        if (errorStatus == CCS811Core::SENSOR_SUCCESS)
         {
-          Serial.println("EEPROM contains saved data.");
-          //The recovered baseline is packed into a 16 bit word
-          baselineToApply = ((unsigned int)EEPROM.read(2) << 8) | EEPROM.read(3);
-          Serial.print("Saved baseline: 0x");
-          if (baselineToApply < 0x100) Serial.print("0");
-          if (baselineToApply < 0x10) Serial.print("0");
-          Serial.println(baselineToApply, HEX);
-          //This programs the baseline into the sensor and monitors error states
-          errorStatus = mySensor.setBaseline( baselineToApply );
-          if ( errorStatus == CCS811Core::SENSOR_SUCCESS )
-          {
-            Serial.println("Baseline written to CCS811.");
-          }
-          else
-          {
-            printDriverError( errorStatus );
-          }
+          Serial.println("Baseline written to CCS811.");
         }
         else
         {
-          Serial.println("Saved data not found!");
+          printDriverError(errorStatus);
         }
-        break;
-      case 'c':
-        //Clear data indicator and data from the eeprom
-        Serial.println("Clearing EEPROM space.");
-        EEPROM.write(0, 0x00);
-        EEPROM.write(1, 0x00);
-        EEPROM.write(2, 0x00);
-        EEPROM.write(3, 0x00);
-        break;
-      case 'r':
-        if (mySensor.dataAvailable())
-        {
-          //Simply print the last sensor data
-          mySensor.readAlgorithmResults();
+      }
+      else
+      {
+        Serial.println("Saved data not found!");
+      }
+      break;
+    case 'c':
+      //Clear data indicator and data from the eeprom
+      Serial.println("Clearing EEPROM space.");
+      EEPROM.write(0, 0x00);
+      EEPROM.write(1, 0x00);
+      EEPROM.write(2, 0x00);
+      EEPROM.write(3, 0x00);
+      break;
+    case 'r':
+      if (mySensor.dataAvailable())
+      {
+        //Simply print the last sensor data
+        mySensor.readAlgorithmResults();
 
-          Serial.print("CO2[");
-          Serial.print(mySensor.getCO2());
-          Serial.print("] tVOC[");
-          Serial.print(mySensor.getTVOC());
-          Serial.print("]");
-          Serial.println();
-        }
-        else
-        {
-          Serial.println("Sensor data not available.");
-        }
-        break;
-      default:
-        break;
+        Serial.print("CO2[");
+        Serial.print(mySensor.getCO2());
+        Serial.print("] tVOC[");
+        Serial.print(mySensor.getTVOC());
+        Serial.print("]");
+        Serial.println();
+      }
+      else
+      {
+        Serial.println("Sensor data not available.");
+      }
+      break;
+    default:
+      break;
     }
   }
   delay(10);
@@ -178,26 +181,26 @@ void loop()
 //
 //Save the return value of any function of type CCS811Core::status, then pass
 //to this function to see what the output was.
-void printDriverError( CCS811Core::status errorCode )
+void printDriverError(CCS811Core::status errorCode)
 {
-  switch ( errorCode )
+  switch (errorCode)
   {
-    case CCS811Core::SENSOR_SUCCESS:
-      Serial.print("SUCCESS");
-      break;
-    case CCS811Core::SENSOR_ID_ERROR:
-      Serial.print("ID_ERROR");
-      break;
-    case CCS811Core::SENSOR_I2C_ERROR:
-      Serial.print("I2C_ERROR");
-      break;
-    case CCS811Core::SENSOR_INTERNAL_ERROR:
-      Serial.print("INTERNAL_ERROR");
-      break;
-    case CCS811Core::SENSOR_GENERIC_ERROR:
-      Serial.print("GENERIC_ERROR");
-      break;
-    default:
-      Serial.print("Unspecified error.");
+  case CCS811Core::SENSOR_SUCCESS:
+    Serial.print("SUCCESS");
+    break;
+  case CCS811Core::SENSOR_ID_ERROR:
+    Serial.print("ID_ERROR");
+    break;
+  case CCS811Core::SENSOR_I2C_ERROR:
+    Serial.print("I2C_ERROR");
+    break;
+  case CCS811Core::SENSOR_INTERNAL_ERROR:
+    Serial.print("INTERNAL_ERROR");
+    break;
+  case CCS811Core::SENSOR_GENERIC_ERROR:
+    Serial.print("GENERIC_ERROR");
+    break;
+  default:
+    Serial.print("Unspecified error.");
   }
 }

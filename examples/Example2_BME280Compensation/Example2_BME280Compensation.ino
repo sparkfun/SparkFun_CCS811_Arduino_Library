@@ -45,7 +45,7 @@ BME280 myBME280;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println();
   Serial.println("Apply BME280 data to CCS811 for compensation.");
 
@@ -55,7 +55,7 @@ void setup()
   CCS811Core::status returnCode = myCCS811.begin();
   Serial.print("CCS811 begin exited with: ");
   //Pass the error code to a function to print the results
-  printDriverError( returnCode );
+  printDriverError(returnCode);
   Serial.println();
 
   //For I2C, enable the following and disable the SPI section
@@ -74,10 +74,8 @@ void setup()
   myBME280.settings.humidOverSample = 5;
 
   //Calling .begin() causes the settings to be loaded
-  delay(10);  //Make sure sensor had enough time to turn on. BME280 requires 2ms to start up.
+  delay(10); //Make sure sensor had enough time to turn on. BME280 requires 2ms to start up.
   myBME280.begin();
-
-
 }
 //---------------------------------------------------------------
 void loop()
@@ -155,8 +153,6 @@ void printInfoSerial()
   Serial.println(" %");
 
   Serial.println();
-
-
 }
 
 //printDriverError decodes the CCS811Core::status type and prints the
@@ -164,27 +160,27 @@ void printInfoSerial()
 //
 //Save the return value of any function of type CCS811Core::status, then pass
 //to this function to see what the output was.
-void printDriverError( CCS811Core::status errorCode )
+void printDriverError(CCS811Core::status errorCode)
 {
-  switch ( errorCode )
+  switch (errorCode)
   {
-    case CCS811Core::SENSOR_SUCCESS:
-      Serial.print("SUCCESS");
-      break;
-    case CCS811Core::SENSOR_ID_ERROR:
-      Serial.print("ID_ERROR");
-      break;
-    case CCS811Core::SENSOR_I2C_ERROR:
-      Serial.print("I2C_ERROR");
-      break;
-    case CCS811Core::SENSOR_INTERNAL_ERROR:
-      Serial.print("INTERNAL_ERROR");
-      break;
-    case CCS811Core::SENSOR_GENERIC_ERROR:
-      Serial.print("GENERIC_ERROR");
-      break;
-    default:
-      Serial.print("Unspecified error.");
+  case CCS811Core::SENSOR_SUCCESS:
+    Serial.print("SUCCESS");
+    break;
+  case CCS811Core::SENSOR_ID_ERROR:
+    Serial.print("ID_ERROR");
+    break;
+  case CCS811Core::SENSOR_I2C_ERROR:
+    Serial.print("I2C_ERROR");
+    break;
+  case CCS811Core::SENSOR_INTERNAL_ERROR:
+    Serial.print("INTERNAL_ERROR");
+    break;
+  case CCS811Core::SENSOR_GENERIC_ERROR:
+    Serial.print("GENERIC_ERROR");
+    break;
+  default:
+    Serial.print("Unspecified error.");
   }
 }
 
@@ -194,19 +190,25 @@ void printSensorError()
 {
   uint8_t error = myCCS811.getErrorRegister();
 
-  if ( error == 0xFF ) //comm error
+  if (error == 0xFF) //comm error
   {
     Serial.println("Failed to get ERROR_ID register.");
   }
   else
   {
     Serial.print("Error: ");
-    if (error & 1 << 5) Serial.print("HeaterSupply");
-    if (error & 1 << 4) Serial.print("HeaterFault");
-    if (error & 1 << 3) Serial.print("MaxResistance");
-    if (error & 1 << 2) Serial.print("MeasModeInvalid");
-    if (error & 1 << 1) Serial.print("ReadRegInvalid");
-    if (error & 1 << 0) Serial.print("MsgInvalid");
+    if (error & 1 << 5)
+      Serial.print("HeaterSupply");
+    if (error & 1 << 4)
+      Serial.print("HeaterFault");
+    if (error & 1 << 3)
+      Serial.print("MaxResistance");
+    if (error & 1 << 2)
+      Serial.print("MeasModeInvalid");
+    if (error & 1 << 1)
+      Serial.print("ReadRegInvalid");
+    if (error & 1 << 0)
+      Serial.print("MsgInvalid");
     Serial.println();
   }
 }

@@ -48,7 +48,7 @@ CCS811 mySensor(CCS811_ADDR);
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("CCS811 Basic Example");
 
   Wire1.begin(); //Compilation will fail here if your hardware doesn't support additional Wire ports
@@ -59,7 +59,8 @@ void setup()
   if (returnCode != CCS811Core::SENSOR_SUCCESS)
   {
     Serial.println(".begin() returned with an error.");
-    while (1); //Hang if there was a problem.
+    while (1)
+      ; //Hang if there was a problem.
   }
 }
 

@@ -47,10 +47,10 @@ CCS811 mySensor(CCS811_ADDR);
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("CCS811 Basic Example");
 
-  Wire.begin(); //Inialize I2C Harware
+  Wire.begin(); //Inialize I2C Hardware
 
   //It is recommended to check return status on .begin(), but it is not
   //required.
@@ -58,7 +58,8 @@ void setup()
   if (returnCode != CCS811Core::SENSOR_SUCCESS)
   {
     Serial.println(".begin() returned with an error.");
-    while (1); //Hang if there was a problem.
+    while (1)
+      ; //Hang if there was a problem.
   }
 }
 
