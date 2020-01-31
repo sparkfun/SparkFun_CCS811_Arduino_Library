@@ -241,7 +241,21 @@ CCS811::CCS811(uint8_t inputArg) : CCS811Core(inputArg)
 //  This starts the lower level begin, then applies settings
 //
 //****************************************************************************//
-CCS811Core::CCS811_Status_e CCS811::begin(TwoWire &wirePort)
+bool CCS811::begin(TwoWire &wirePort)
+{
+	if (beginWithStatus(wirePort) == CCS811_Stat_SUCCESS)
+		return true;
+	return false;
+}
+
+//****************************************************************************//
+//
+//  Begin
+//
+//  This starts the lower level begin, then applies settings
+//
+//****************************************************************************//
+CCS811Core::CCS811_Status_e CCS811::beginWithStatus(TwoWire &wirePort)
 {
 	uint8_t data[4] = {0x11, 0xE5, 0x72, 0x8A};					   //Reset key
 	CCS811Core::CCS811_Status_e returnError = CCS811_Stat_SUCCESS; //Default error state

@@ -105,7 +105,8 @@ public:
 	CCS811(uint8_t);
 
 	//Call to check for errors, start app, and set default mode 1
-	CCS811_Status_e begin(TwoWire &wirePort = Wire);				  //Use the Wire hardware by default
+	bool begin(TwoWire &wirePort = Wire);							  //Use the Wire hardware by default
+	CCS811_Status_e beginWithStatus(TwoWire &wirePort = Wire);		  //Use the Wire hardware by default
 	const char *statusString(CCS811_Status_e stat = CCS811_Stat_NUM); // Returns a human-readable status message. Defaults to status member, but prints string for supplied status if supplied
 
 	CCS811_Status_e readAlgorithmResults(void);
