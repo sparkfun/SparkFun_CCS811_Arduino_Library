@@ -54,23 +54,23 @@ void setup()
   Wire.begin();
 
   //This setup routine is similar to what is used in the subclass' .begin() function
-  CCS811Core::status returnCode = mySensor.beginCore(Wire); //Pass in the Wire port you want to use
+  CCS811Core::CCS811_Status_e returnCode = mySensor.beginCore(Wire); //Pass in the Wire port you want to use
   Serial.print("beginCore exited with: ");
   switch (returnCode)
   {
-  case CCS811Core::SENSOR_SUCCESS:
+  case CCS811Core::CCS811_Stat_SUCCESS:
     Serial.print("SUCCESS");
     break;
-  case CCS811Core::SENSOR_ID_ERROR:
+  case CCS811Core::CCS811_Stat_ID_ERROR:
     Serial.print("ID_ERROR");
     break;
-  case CCS811Core::SENSOR_I2C_ERROR:
+  case CCS811Core::CCS811_Stat_I2C_ERROR:
     Serial.print("I2C_ERROR");
     break;
-  case CCS811Core::SENSOR_INTERNAL_ERROR:
+  case CCS811Core::CCS811_Stat_INTERNAL_ERROR:
     Serial.print("INTERNAL_ERROR");
     break;
-  case CCS811Core::SENSOR_GENERIC_ERROR:
+  case CCS811Core::CCS811_Stat_GENERIC_ERROR:
     Serial.print("GENERIC_ERROR");
     break;
   default:

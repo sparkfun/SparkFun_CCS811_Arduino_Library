@@ -51,11 +51,10 @@ void setup()
 
   Wire.begin();
 
-  //This begins the CCS811 sensor and prints error status of .begin()
-  CCS811Core::status returnCode = myCCS811.begin();
-  Serial.print("begin exited with: ");
-  printDriverError(returnCode);
-  Serial.println();
+  //This begins the CCS811 sensor and prints error status of .beginWithStatus()
+  CCS811Core::CCS811_Status_e returnCode = myCCS811.beginWithStatus();
+  Serial.print("CCS811 begin exited with: ");
+  Serial.println(myCCS811.statusString(returnCode));
 }
 
 void loop()
@@ -101,40 +100,6 @@ void printRunTime()
 
   if (hours == 0 && minutes < 20)
     Serial.print(" Not yet valid");
-}
-
-//printDriverError decodes the CCS811Core::status type and prints the
-//type of error to the serial terminal.
-//
-//Save the return value of any function of type CCS811Core::status, then pass
-//to this function to see what the output was.
-//printDriverError decodes the CCS811Core::status type and prints the
-//type of error to the serial terminal.
-//
-//Save the return value of any function of type CCS811Core::status, then pass
-//to this function to see what the output was.
-void printDriverError(CCS811Core::status errorCode)
-{
-  switch (errorCode)
-  {
-  case CCS811Core::SENSOR_SUCCESS:
-    Serial.print("SUCCESS");
-    break;
-  case CCS811Core::SENSOR_ID_ERROR:
-    Serial.print("ID_ERROR");
-    break;
-  case CCS811Core::SENSOR_I2C_ERROR:
-    Serial.print("I2C_ERROR");
-    break;
-  case CCS811Core::SENSOR_INTERNAL_ERROR:
-    Serial.print("INTERNAL_ERROR");
-    break;
-  case CCS811Core::SENSOR_GENERIC_ERROR:
-    Serial.print("GENERIC_ERROR");
-    break;
-  default:
-    Serial.print("Unspecified error.");
-  }
 }
 
 //printSensorError gets, clears, then prints the errors

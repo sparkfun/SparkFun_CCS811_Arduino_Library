@@ -66,9 +66,11 @@ void setup()
 
   Wire.begin();
 
-  CCS811Core::status returnCode = mySensor.begin();
-  Serial.print("begin exited with: ");
-  printDriverError(returnCode);
+  //This begins the CCS811 sensor and prints error status of .beginWithStatus()
+  CCS811Core::CCS811_Status_e returnCode = mySensor.beginWithStatus();
+  Serial.print("CCS811 begin exited with: ");
+  //Pass the error code to a function to print the results
+  Serial.print(mySensor.statusString(returnCode));
   Serial.println();
 
   //This looks for previously saved data in the eeprom at program start
@@ -94,7 +96,7 @@ void loop()
   char c;
   unsigned int result;
   unsigned int baselineToApply;
-  CCS811Core::status errorStatus;
+  CCS811Core::CCS811_Status_e errorStatus;
   if (Serial.available())
   {
     c = Serial.read();
@@ -129,13 +131,14 @@ void loop()
         Serial.println(baselineToApply, HEX);
         //This programs the baseline into the sensor and monitors error states
         errorStatus = mySensor.setBaseline(baselineToApply);
-        if (errorStatus == CCS811Core::SENSOR_SUCCESS)
+        if (errorStatus == CCS811Core::CCS811_Stat_SUCCESS)
         {
           Serial.println("Baseline written to CCS811.");
         }
         else
         {
-          printDriverError(errorStatus);
+          Serial.print("Error writing baseline: ");
+          Serial.println(mySensor.statusString(errorStatus));
         }
       }
       else
@@ -174,33 +177,4 @@ void loop()
     }
   }
   delay(10);
-}
-
-//printDriverError decodes the CCS811Core::status type and prints the
-//type of error to the serial terminal.
-//
-//Save the return value of any function of type CCS811Core::status, then pass
-//to this function to see what the output was.
-void printDriverError(CCS811Core::status errorCode)
-{
-  switch (errorCode)
-  {
-  case CCS811Core::SENSOR_SUCCESS:
-    Serial.print("SUCCESS");
-    break;
-  case CCS811Core::SENSOR_ID_ERROR:
-    Serial.print("ID_ERROR");
-    break;
-  case CCS811Core::SENSOR_I2C_ERROR:
-    Serial.print("I2C_ERROR");
-    break;
-  case CCS811Core::SENSOR_INTERNAL_ERROR:
-    Serial.print("INTERNAL_ERROR");
-    break;
-  case CCS811Core::SENSOR_GENERIC_ERROR:
-    Serial.print("GENERIC_ERROR");
-    break;
-  default:
-    Serial.print("Unspecified error.");
-  }
 }

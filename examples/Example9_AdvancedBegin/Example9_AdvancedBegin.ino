@@ -53,15 +53,10 @@ void setup()
 
   Wire1.begin(); //Compilation will fail here if your hardware doesn't support additional Wire ports
 
-  //It is recommended to check return status on .begin(), but it is not
-  //required.
-  CCS811Core::status returnCode = mySensor.begin(Wire1);
-  if (returnCode != CCS811Core::SENSOR_SUCCESS)
-  {
-    Serial.println(".begin() returned with an error.");
-    while (1)
-      ; //Hang if there was a problem.
-  }
+  //This begins the CCS811 sensor and prints error status of .beginWithStatus()
+  CCS811Core::CCS811_Status_e returnCode = mySensor.beginWithStatus(Wire1); //Pass Wire1 into the library
+  Serial.print("CCS811 begin exited with: ");
+  Serial.println(mySensor.statusString(returnCode));
 }
 
 void loop()

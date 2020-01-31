@@ -66,27 +66,23 @@ void setup()
 
   Wire.begin();
 
-  CCS811Core::status returnCode;
-
-  //This begins the CCS811 sensor and prints error status of .begin()
-  returnCode = myCCS811.begin();
+  //This begins the CCS811 sensor and prints error status of .beginWithStatus()
+  CCS811Core::CCS811_Status_e returnCode = myCCS811.beginWithStatus();
   Serial.print("CCS811 begin exited with: ");
-  printDriverError(returnCode);
-  Serial.println();
+  //Pass the error code to a function to print the results
+  Serial.println(myCCS811.statusString(returnCode));
 
   //This sets the mode to 60 second reads, and prints returned error status.
   returnCode = myCCS811.setDriveMode(2);
   Serial.print("Mode request exited with: ");
-  printDriverError(returnCode);
-  Serial.println();
+  Serial.println(myCCS811.statusString(returnCode));
 
   //Configure and enable the interrupt line,
   //then print error status
   pinMode(PIN_NOT_INT, INPUT_PULLUP);
   returnCode = myCCS811.enableInterrupts();
   Serial.print("Interrupt configuation exited with: ");
-  printDriverError(returnCode);
-  Serial.println();
+  Serial.println(myCCS811.statusString(returnCode));
 
   //Configure the wake line
   pinMode(PIN_NOT_WAKE, OUTPUT);
@@ -120,35 +116,6 @@ void loop()
     delay(1);
   }
   delay(1); //cycle kinda fast
-}
-
-//printDriverError decodes the CCS811Core::status type and prints the
-//type of error to the serial terminal.
-//
-//Save the return value of any function of type CCS811Core::status, then pass
-//to this function to see what the output was.
-void printDriverError(CCS811Core::status errorCode)
-{
-  switch (errorCode)
-  {
-  case CCS811Core::SENSOR_SUCCESS:
-    Serial.print("SUCCESS");
-    break;
-  case CCS811Core::SENSOR_ID_ERROR:
-    Serial.print("ID_ERROR");
-    break;
-  case CCS811Core::SENSOR_I2C_ERROR:
-    Serial.print("I2C_ERROR");
-    break;
-  case CCS811Core::SENSOR_INTERNAL_ERROR:
-    Serial.print("INTERNAL_ERROR");
-    break;
-  case CCS811Core::SENSOR_GENERIC_ERROR:
-    Serial.print("GENERIC_ERROR");
-    break;
-  default:
-    Serial.print("Unspecified error.");
-  }
 }
 
 //printSensorError gets, clears, then prints the errors
