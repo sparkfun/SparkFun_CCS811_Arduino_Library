@@ -8,6 +8,10 @@
   https://github.com/sparkfun/CCS811_Air_Quality_Breakout
   https://github.com/sparkfun/SparkFun_CCS811_Arduino_Library
 
+  NOTE: Temperature from an attached NTC Thermistor is no longer supported on the CCS811.
+  This example is for reference only and will only work on SparkFun Air Quality Breakouts purchased in 2017.
+  For temp/humidity compensation on the CCS811, refer to Example 2 - BME280 Compensation.
+
   This example uses an NTC thermistor to gather temperature data that is then used
   to compensate the CCS811.  (humidity defaulted at 50%)
 

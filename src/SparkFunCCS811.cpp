@@ -227,8 +227,8 @@ CCS811Core::CCS811_Status_e CCS811Core::multiWriteRegister(uint8_t offset, uint8
 //****************************************************************************//
 CCS811::CCS811(uint8_t inputArg) : CCS811Core(inputArg)
 {
-	refResistance = 10000;
-	resistance = 0;
+	refResistance = 10000; //Unsupported feature. 
+	resistance = 0; //Unsupported feature. 
 	temperature = 0;
 	tVOC = 0;
 	CO2 = 0;
@@ -514,6 +514,28 @@ CCS811Core::CCS811_Status_e CCS811::setEnvironmentalData(float relativeHumidity,
 	return returnError;
 }
 
+uint16_t CCS811::getTVOC(void)
+{
+	return tVOC;
+}
+
+uint16_t CCS811::getCO2(void)
+{
+	return CO2;
+}
+
+//****************************************************************************//
+//
+//	The CCS811 no longer supports temperature compensation from an NTC thermistor.
+//	NTC thermistor compensation will only work on boards purchased in 2017.
+//	List of unsupported functions:
+//		setRefResistance();
+//		readNTC();
+//		getResistance();
+//		getTemperature();	
+//
+//****************************************************************************//
+
 void CCS811::setRefResistance(float input)
 {
 	refResistance = input;
@@ -541,16 +563,6 @@ CCS811Core::CCS811_Status_e CCS811::readNTC(void)
 	temperature = temperature - 273.15; // Convert Kelvin to Celsius
 
 	return returnError;
-}
-
-uint16_t CCS811::getTVOC(void)
-{
-	return tVOC;
-}
-
-uint16_t CCS811::getCO2(void)
-{
-	return CO2;
 }
 
 float CCS811::getResistance(void)

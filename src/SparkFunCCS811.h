@@ -36,7 +36,7 @@ Distributed as-is; no warranty is given.
 #define CSS811_ALG_RESULT_DATA 0x02
 #define CSS811_RAW_DATA 0x03
 #define CSS811_ENV_DATA 0x05
-#define CSS811_NTC 0x06
+#define CSS811_NTC 0x06 //NTC compensation no longer supported
 #define CSS811_THRESHOLDS 0x10
 #define CSS811_BASELINE 0x11
 #define CSS811_HW_ID 0x20
@@ -120,17 +120,17 @@ public:
 	CCS811_Status_e disableInterrupts(void);
 	CCS811_Status_e setDriveMode(uint8_t mode);
 	CCS811_Status_e setEnvironmentalData(float relativeHumidity, float temperature);
-	void setRefResistance(float);
-	CCS811_Status_e readNTC(void);
+	void setRefResistance(float); //Unsupported feature. Refer to CPP file for more information.
+	CCS811_Status_e readNTC(void); //Unsupported feature. Refer to CPP file for more information.
 	uint16_t getTVOC(void);
 	uint16_t getCO2(void);
-	float getResistance(void);
-	float getTemperature(void);
+	float getResistance(void); //Unsupported feature. Refer to CPP file for more information.
+	float getTemperature(void); //Unsupported feature. Refer to CPP file for more information.
 
 private:
 	//These are the air quality values obtained from the sensor
-	float refResistance;
-	float resistance;
+	float refResistance; //Unsupported feature. Refer to CPP file for more information.
+	float resistance; //Unsupported feature. Refer to CPP file for more information.
 	uint16_t tVOC;
 	uint16_t CO2;
 	uint16_t vrefCounts = 0;
