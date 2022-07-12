@@ -97,7 +97,6 @@ CCS811Core::CCS811_Status_e CCS811Core::beginCore(TwoWire &wirePort)
 CCS811Core::CCS811_Status_e CCS811Core::readRegister(uint8_t offset, uint8_t *outputPointer)
 {
 	//Return value
-	uint8_t result = 1;
 	uint8_t numBytes = 1;
 	CCS811Core::CCS811_Status_e returnError = CCS811_Stat_SUCCESS;
 
