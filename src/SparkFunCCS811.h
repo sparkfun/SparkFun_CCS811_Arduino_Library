@@ -70,6 +70,9 @@ public:
 	CCS811Core(uint8_t);
 	~CCS811Core() = default;
 
+	void setI2CAddress(uint8_t address){
+		I2CAddress = address;
+	}
 	CCS811_Status_e beginCore(TwoWire &wirePort);
 
 	//***Reading functions***//
@@ -103,6 +106,7 @@ class CCS811 : public CCS811Core
 {
 public:
 	CCS811(uint8_t);
+	CCS811();
 
 	//Call to check for errors, start app, and set default mode 1
 	bool begin(TwoWire &wirePort = Wire);							  //Use the Wire hardware by default
