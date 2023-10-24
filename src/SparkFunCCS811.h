@@ -27,6 +27,7 @@ Distributed as-is; no warranty is given.
 #ifndef __CCS811_H__
 #define __CCS811_H__
 
+#include "Arduino.h"
 #include "stdint.h"
 #include <Wire.h>
 
